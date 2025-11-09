@@ -1,7 +1,7 @@
 local Circle = require("shapes/circle")
 local Rectangle = require("shapes/rectangle")
 local Triangle = require("shapes/triangle")
-require("libs/collision")
+local algo = require("libs/collision_detection")
 
 local objects = {}
 local screen_width
@@ -82,7 +82,7 @@ function love.update(dt)
 
   for i = 1, #objects do
     for j = i + 1, #objects do
-      if is_collision(objects[i], objects[j]) then
+      if algo.detect_collision(objects[i], objects[j]) then
         objects[i].is_colliding = true
         objects[j].is_colliding = true
       end
