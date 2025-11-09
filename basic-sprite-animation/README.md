@@ -1,5 +1,4 @@
-# Love2D 101
+# Love2D 101: Sprite animation and basic movements
 
-![](../videos/basic-movement-animation-with-sprite-sheet.mp4)
-
+Uploading basic-movement-animation-with-sprite-sheet.mp4…
 
