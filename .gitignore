@@ -39,3 +39,6 @@ luac.out
 *.x86_64
 *.hex
 
+# Local AI assistant
+.claude/
+CLAUDE.md
