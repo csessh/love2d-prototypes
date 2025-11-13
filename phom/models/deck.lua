@@ -23,11 +23,7 @@ function Deck:initialize()
 end
 
 function Deck:shuffle()
-  -- Seed random number generator with time
-  local seed = os.time() + math.floor((love and love.timer.getTime() * 1000 or 0))
-  math.randomseed(seed)
-
-  -- Fisher-Yates shuffle
+  -- Fisher-Yates shuffle (RNG seeded in love.load())
   for i = #self.cards, 2, -1 do
     local j = math.random(i)
     self.cards[i], self.cards[j] = self.cards[j], self.cards[i]

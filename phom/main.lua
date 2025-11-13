@@ -8,6 +8,9 @@ local input_controller
 local game_view
 
 function love.load()
+  -- Initialize random seed once at startup for better randomness
+  math.randomseed(os.time() + math.floor(love.timer.getTime() * 1000))
+
   love.graphics.setDefaultFilter("nearest", "nearest")
 
   game_controller = GameController.new()
