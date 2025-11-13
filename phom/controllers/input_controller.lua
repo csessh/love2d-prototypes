@@ -26,6 +26,11 @@ end
 function InputController:mousepressed(x, y, button)
   if button ~= 1 then return end  -- Only left click
 
+  -- Block input during animations
+  if self.game_controller.animating then
+    return
+  end
+
   local game_state = self.game_controller.game_state
 
   if game_state.current_state == Constants.STATES.PLAYER_TURN then
@@ -44,6 +49,12 @@ end
 
 function InputController:updateHover()
   local game_state = self.game_controller.game_state
+
+  -- Block hover during animations
+  if self.game_controller.animating then
+    self:clearHover()
+    return
+  end
 
   -- Only apply hover effects during player turn for human player
   if game_state.current_state ~= Constants.STATES.PLAYER_TURN then
