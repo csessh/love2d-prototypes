@@ -42,3 +42,6 @@ luac.out
 # Local AI assistant
 .claude/
 CLAUDE.md
+
+# Git worktrees
+.worktrees/
