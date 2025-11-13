@@ -17,19 +17,20 @@ Constants.SUIT_SYMBOLS = {
   spades = "♠"
 }
 
--- Card ranks (2-14, where 11=J, 12=Q, 13=K, 14=A)
-Constants.RANKS = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
+-- Card ranks (1-13, where 1=A, 11=J, 12=Q, 13=K)
+-- Ace is LOWEST rank. A-2-3-4 valid, J-Q-K-A invalid (no wrap)
+Constants.RANKS = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
 Constants.RANK_NAMES = {
-  [2]="2", [3]="3", [4]="4", [5]="5", [6]="6",
+  [1]="A", [2]="2", [3]="3", [4]="4", [5]="5", [6]="6",
   [7]="7", [8]="8", [9]="9", [10]="10",
-  [11]="J", [12]="Q", [13]="K", [14]="A"
+  [11]="J", [12]="Q", [13]="K"
 }
 
--- Card point values
+-- Card point values (Ace = 1 point)
 Constants.CARD_POINTS = {
-  [2]=2, [3]=3, [4]=4, [5]=5, [6]=6,
+  [1]=1, [2]=2, [3]=3, [4]=4, [5]=5, [6]=6,
   [7]=7, [8]=8, [9]=9, [10]=10,
-  [11]=11, [12]=12, [13]=13, [14]=1  -- Ace = 1
+  [11]=11, [12]=12, [13]=13
 }
 
 -- Game states
