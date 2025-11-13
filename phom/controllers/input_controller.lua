@@ -132,12 +132,7 @@ function InputController:handleChooseAction(x, y)
   local game_state = self.game_controller.game_state
 
   -- Check if clicked on deck
-  local spacing = 20
-  local total_width = (Constants.CARD_WIDTH * CARD_SCALE * 2) + spacing
-  local deck_x = Constants.SCREEN_WIDTH / 2 - total_width / 2 + (Constants.CARD_WIDTH * CARD_SCALE / 2)
-  local deck_y = Constants.SCREEN_HEIGHT / 2
-
-  if self:isPointInCard(x, y, deck_x, deck_y, CARD_SCALE) and not game_state:isDeckEmpty() then
+  if self:isPointInCard(x, y, Constants.DECK_X, Constants.DECK_Y, CARD_SCALE) and not game_state:isDeckEmpty() then
     print("Clicked deck - drawing card with animation")
     local card = game_state.deck:draw()
     if card then

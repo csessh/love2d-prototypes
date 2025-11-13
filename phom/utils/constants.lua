@@ -8,11 +8,13 @@ Constants.SCREEN_HEIGHT = 720
 Constants.CARD_WIDTH = 71
 Constants.CARD_HEIGHT = 96
 
--- Deck and discard pile positions
-Constants.DECK_X = 400
-Constants.DECK_Y = 300
-Constants.DISCARD_X = 800
-Constants.DISCARD_Y = 300
+-- Deck and discard pile positions (calculated to match GameView rendering)
+-- CARD_SCALE = 2, spacing = 20
+-- total_width = (CARD_WIDTH * CARD_SCALE * 2) + spacing = 304
+Constants.DECK_X = 559  -- SCREEN_WIDTH / 2 - total_width / 2 + (CARD_WIDTH * CARD_SCALE / 2)
+Constants.DECK_Y = 360  -- SCREEN_HEIGHT / 2
+Constants.DISCARD_X = 721  -- SCREEN_WIDTH / 2 + total_width / 2 - (CARD_WIDTH * CARD_SCALE / 2)
+Constants.DISCARD_Y = 360  -- SCREEN_HEIGHT / 2
 
 -- Card suits
 Constants.SUITS = {"hearts", "diamonds", "clubs", "spades"}
