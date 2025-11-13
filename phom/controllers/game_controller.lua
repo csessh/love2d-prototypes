@@ -143,4 +143,31 @@ function GameController:onDrawAnimationComplete(card)
   self.animation_card = nil
 end
 
+function GameController:startDiscardAnimation(card)
+  self.animating = true
+  self.animation_card = card
+  self.game_state.turn_substep = Constants.TURN_SUBSTEPS.ANIMATING_DISCARD
+
+  local start_x = card.x
+  local start_y = card.y
+
+  flux.to(card, 0.25, {x = Constants.DISCARD_X, y = Constants.DISCARD_Y})
+    :oncomplete(function()
+      self:onDiscardAnimationComplete(card)
+    end)
+end
+
+function GameController:onDiscardAnimationComplete(card)
+  local player = self.game_state:getCurrentPlayer()
+
+  player:removeCardFromHand(card)
+
+  self.game_state:addToDiscard(card)
+
+  self:endTurn()
+
+  self.animating = false
+  self.animation_card = nil
+end
+
 return GameController

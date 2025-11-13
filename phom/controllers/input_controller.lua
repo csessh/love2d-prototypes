@@ -171,13 +171,15 @@ function InputController:handleDiscardPhase(x, y)
   local total_width = (#player.hand - 1) * card_spacing
   local start_x = center_x - total_width / 2
 
-  for i, card in ipairs(player.hand) do
+  -- Check cards in REVERSE order (rightmost/topmost first)
+  for i = #player.hand, 1, -1 do
+    local card = player.hand[i]
     local card_x = start_x + (i - 1) * card_spacing
     local card_y = center_y + (card.hover_offset_y or 0)
 
     if self:isPointInCard(x, y, card_x, card_y, CARD_SCALE) then
-      print("Discarding card:", card)
-      self.game_controller:discardCard(card)
+      print("Discarding card with animation:", card)
+      self.game_controller:startDiscardAnimation(card)
       self:clearHover()  -- Clear hover when discarding
       return
     end
