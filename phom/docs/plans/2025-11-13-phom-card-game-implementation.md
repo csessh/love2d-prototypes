@@ -2048,17 +2048,300 @@ Add simple AI that draws and discards highest-value cards"
 
 ---
 
+### Task 15: Card Drag-and-Drop Reordering
+
+**Goal:** Allow human player to manually rearrange cards in their hand by dragging
+
+**Current Behavior:**
+- Cards are displayed in the order they were drawn
+- No way to reorganize cards
+- Makes it difficult to group cards by suit/rank for meld planning
+
+**Required Behavior:**
+- Player can click and hold on a card in their hand
+- While holding, card follows mouse cursor
+- Visual feedback: dragged card is slightly larger or elevated
+- When released, card is inserted at the nearest position in hand
+- Other cards smoothly slide aside to make room
+- Only works during player's turn when not animating
+
+**Implementation Steps:**
+
+1. **Add Drag State to InputController**
+   ```lua
+   function InputController.new(game_controller)
+     local instance = {
+       game_controller = game_controller,
+       hovered_card = nil,
+       hovered_card_index = nil,
+       mouse_x = 0,
+       mouse_y = 0,
+       dragging_card = nil,           -- NEW: Card being dragged
+       dragging_card_index = nil,     -- NEW: Original position of dragged card
+       drag_offset_x = 0,             -- NEW: Mouse offset from card center
+       drag_offset_y = 0,             -- NEW: Mouse offset from card center
+     }
+     return setmetatable(instance, InputController)
+   end
+   ```
+
+2. **Detect Drag Start in mousepressed()**
+   ```lua
+   function InputController:mousepressed(x, y, button)
+     if button ~= 1 then return end
+     if self.game_controller.animating then return end
+
+     local game_state = self.game_controller.game_state
+
+     -- Only allow dragging during discard phase or choose action (player's turn)
+     if game_state.current_state == Constants.STATES.PLAYER_TURN then
+       if game_state.turn_substep == Constants.TURN_SUBSTEPS.CHOOSE_ACTION or
+          game_state.turn_substep == Constants.TURN_SUBSTEPS.DISCARD_PHASE then
+
+         -- Check if clicked on a card in hand
+         local player = game_state:getCurrentPlayer()
+         if player.type == "human" then
+           local card_index = self:getCardAtPosition(x, y, player)
+           if card_index then
+             -- Start dragging
+             self.dragging_card = player.hand[card_index]
+             self.dragging_card_index = card_index
+             self.drag_offset_x = x - self.dragging_card.x
+             self.drag_offset_y = y - self.dragging_card.y
+             return  -- Don't handle as normal click
+           end
+         end
+       end
+     end
+
+     -- ... normal click handling
+   end
+   ```
+
+3. **Update Drag Position in mousemoved()**
+   ```lua
+   function InputController:mousemoved(x, y)
+     self.mouse_x = x
+     self.mouse_y = y
+
+     -- Update dragged card position
+     if self.dragging_card then
+       self.dragging_card.x = x - self.drag_offset_x
+       self.dragging_card.y = y - self.drag_offset_y
+     end
+   end
+   ```
+
+4. **Handle Drag Release in mousereleased()**
+   ```lua
+   function InputController:mousereleased(x, y, button)
+     if button ~= 1 then return end
+
+     if self.dragging_card then
+       -- Calculate where to insert the card
+       local player = self.game_controller.game_state:getCurrentPlayer()
+       local new_index = self:calculateInsertPosition(x, player)
+
+       -- Reorder hand
+       self:reorderHand(player, self.dragging_card_index, new_index)
+
+       -- Clear drag state
+       self.dragging_card = nil
+       self.dragging_card_index = nil
+     end
+   end
+   ```
+
+5. **Calculate Insert Position**
+   ```lua
+   function InputController:calculateInsertPosition(x, player)
+     -- Calculate card positions (same as drawBottomPlayer)
+     local center_x = Constants.SCREEN_WIDTH / 2
+     local card_spacing = Constants.CARD_WIDTH
+     local total_width = (#player.hand - 1) * card_spacing
+     local start_x = center_x - total_width / 2
+
+     -- Find closest card slot
+     for i = 1, #player.hand do
+       local slot_x = start_x + (i - 1) * card_spacing
+       if x < slot_x + card_spacing / 2 then
+         return i
+       end
+     end
+
+     return #player.hand  -- Default to end
+   end
+   ```
+
+6. **Reorder Hand Array**
+   ```lua
+   function InputController:reorderHand(player, from_index, to_index)
+     if from_index == to_index then return end
+
+     -- Remove card from original position
+     local card = table.remove(player.hand, from_index)
+
+     -- Insert at new position (adjust index if needed)
+     local insert_index = to_index
+     if to_index > from_index then
+       insert_index = to_index - 1
+     end
+
+     table.insert(player.hand, insert_index, card)
+   end
+   ```
+
+7. **Modify GameView to Render Dragged Card on Top**
+   ```lua
+   function GameView:drawBottomPlayer(player, dragging_card)
+     -- ... draw all cards normally
+
+     for i, card in ipairs(player.hand) do
+       -- Skip the dragging card in normal render
+       if card ~= dragging_card then
+         local x = start_x + (i - 1) * card_spacing
+         local y = center_y + (card.hover_offset_y or 0)
+         card.x = x
+         card.y = y
+         card.face_up = player.type == "human"
+         self.card_renderer:drawCard(card, x, y, 0, CARD_SCALE)
+       end
+     end
+   end
+
+   function GameView:draw(game_state, game_controller, input_controller)
+     -- ... draw everything
+
+     -- Draw dragging card last (on top of everything)
+     if input_controller and input_controller.dragging_card then
+       local card = input_controller.dragging_card
+       self.card_renderer:drawCard(card, card.x, card.y, 0, CARD_SCALE * 1.1)  -- Slightly larger
+     end
+   end
+   ```
+
+**Challenges:**
+- Must calculate correct insert position considering card spacing
+- Handle edge cases (dragging to same position, dragging outside hand area)
+- Ensure dragged card renders on top of all other elements
+- Prevent dragging during animations or AI turns
+- May need to disable hover effects while dragging
+
+**Testing:**
+- Drag card to beginning, middle, and end of hand
+- Drag card and release in same position (no change)
+- Try dragging during animation (should be blocked)
+- Verify card order persists after reordering
+
+**Files to Modify:**
+- `phom/controllers/input_controller.lua`: Add drag state, mousepressed, mousereleased, reorder logic
+- `phom/views/game_view.lua`: Render dragged card on top
+- `phom/main.lua`: Add `love.mousereleased()` callback
+
+---
+
+### Task 16: Keyboard Shortcuts
+
+**Goal:** Add keyboard shortcuts for common actions
+
+**Required Shortcuts:**
+
+1. **ESC - Quit Game**
+   - Press ESC to exit application immediately
+   - Works from any game state
+
+2. **R - Restart Game**
+   - Press R to start a new round
+   - Resets game state, shuffles deck, deals new cards
+   - Works from any game state
+
+**Implementation Steps:**
+
+1. **Add love.keypressed() Callback to main.lua**
+   ```lua
+   function love.keypressed(key)
+     if key == "escape" then
+       love.event.quit()
+     elseif key == "r" then
+       game_controller:restartGame()
+     end
+   end
+   ```
+
+2. **Add restartGame() Method to GameController**
+   ```lua
+   function GameController:restartGame()
+     -- Reset game state
+     self.game_state = GameState.new()
+     self.game_state.current_state = Constants.STATES.DEALING
+
+     -- Reset animation state
+     self.animating = false
+     self.animation_card = nil
+
+     -- Reset dealing state if Task 14 is implemented
+     if self.dealing_in_progress ~= nil then
+       self.dealing_in_progress = false
+       self.dealing_card_index = 0
+       self.dealing_timer = 0
+     end
+
+     -- Reset AI state
+     self.ai_controller.think_timer = 0
+     self.ai_controller.waiting_for_animation = false
+     self.ai_controller.card_to_discard = nil
+   end
+   ```
+
+3. **Add Visual Feedback (Optional)**
+   - Display keyboard hints on screen: "ESC: Quit | R: Restart"
+   - Could show in GameView:drawUI()
+   ```lua
+   function GameView:drawUI(game_state)
+     love.graphics.setColor(1, 1, 1)
+     love.graphics.print("Round: " .. game_state.round_number, 10, 10)
+     love.graphics.print("State: " .. game_state.current_state, 10, 30)
+
+     -- Keyboard shortcuts hint
+     love.graphics.setColor(0.7, 0.7, 0.7)
+     love.graphics.print("ESC: Quit | R: Restart", 10, Constants.SCREEN_HEIGHT - 30)
+     love.graphics.setColor(1, 1, 1)
+
+     self:drawTurnIndicator(game_state)
+   end
+   ```
+
+**Alternative: Confirmation Dialog for Restart**
+- Instead of instant restart, show confirmation
+- Requires additional UI state for dialog
+- Could be added later if instant restart feels too aggressive
+
+**Testing:**
+- Press ESC from various game states (menu, dealing, playing, round end)
+- Press R during gameplay and verify new game starts correctly
+- Verify R during animations properly resets state
+- Check that shortcuts work regardless of which player's turn it is
+
+**Files to Modify:**
+- `phom/main.lua`: Add `love.keypressed()` callback
+- `phom/controllers/game_controller.lua`: Add `restartGame()` method
+- `phom/views/game_view.lua`: Optional keyboard hints display
+
+---
+
 ## Remaining Tasks Summary
 
 The following tasks complete the implementation:
 
-- **Task 14**: ~~Card selection for meld formation (UI interaction)~~ → **Replaced with Animated Dealing Phase (above)**
-- **Task 15**: Meld validation and formation logic
-- **Task 16**: Advanced AI behavior tree
+- **Task 14**: Animated Dealing Phase (detailed above)
+- **Task 15**: Card Drag-and-Drop Reordering (detailed above)
+- **Task 16**: Keyboard Shortcuts - ESC & R (detailed above)
 - **Task 17**: ~~Animation system with flux~~ ✅ **COMPLETED**
-- **Task 18**: Card sprite integration (replace placeholders)
-- **Task 19**: UI polish (buttons, highlights, feedback)
-- **Task 20**: Round end screen and scoring display
-- **Task 21**: Testing and bug fixes
+- **Task 18**: Meld validation and formation logic
+- **Task 19**: Advanced AI behavior tree
+- **Task 20**: Card sprite integration (replace placeholders)
+- **Task 21**: UI polish (buttons, highlights, feedback)
+- **Task 22**: Round end screen and scoring display
+- **Task 23**: Testing and bug fixes
 
 Would you like me to continue with the detailed steps for these remaining tasks?
