@@ -9,6 +9,8 @@ function AIController.new(game_controller)
     game_controller = game_controller,
     think_timer = 0,
     think_duration = 1.0,
+    waiting_for_animation = false,
+    card_to_discard = nil,
   }
   return setmetatable(instance, AIController)
 end
@@ -17,28 +19,39 @@ function AIController:update(dt)
   local game_state = self.game_controller.game_state
 
   if game_state.current_state == Constants.STATES.AI_TURN then
-    self.think_timer = self.think_timer + dt
+    -- If waiting for animation to complete, check if we can discard now
+    if self.waiting_for_animation then
+      if game_state.turn_substep == Constants.TURN_SUBSTEPS.DISCARD_PHASE then
+        -- Draw animation completed, now choose card to discard from new hand
+        local ai_player = game_state:getCurrentPlayer()
+        local highest_card = self:findHighestPointCard(ai_player.hand)
+        if highest_card then
+          self.game_controller:discardCard(highest_card)
+        end
+        self.waiting_for_animation = false
+      end
+    else
+      -- Normal AI thinking logic
+      self.think_timer = self.think_timer + dt
 
-    if self.think_timer >= self.think_duration then
-      self:makeMove()
-      self.think_timer = 0
+      if self.think_timer >= self.think_duration then
+        self:makeMove()
+        self.think_timer = 0
+      end
     end
   end
 end
 
 function AIController:makeMove()
-  local game_state = self.game_controller.game_state
-  local ai_player = game_state:getCurrentPlayer()
-
   -- Simple AI: just draw and discard
   -- TODO: Implement behavior tree
 
+  -- Start draw (will trigger animation)
   self.game_controller:drawCard()
 
-  local highest_card = self:findHighestPointCard(ai_player.hand)
-  if highest_card then
-    self.game_controller:discardCard(highest_card)
-  end
+  -- Wait for draw animation to complete before discarding
+  -- (update() will handle discarding once turn_substep becomes DISCARD_PHASE)
+  self.waiting_for_animation = true
 end
 
 function AIController:findHighestPointCard(hand)

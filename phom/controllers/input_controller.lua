@@ -24,21 +24,43 @@ function InputController:update(dt)
 end
 
 function InputController:mousepressed(x, y, button)
-  if button ~= 1 then return end  -- Only left click
+  print("=== MOUSE PRESSED ===")
+  print("Button:", button)
+  print("Position:", x, y)
 
-  -- Block input during animations
-  if self.game_controller.animating then
+  if button ~= 1 then
+    print("Not left click, ignoring")
     return
   end
 
   local game_state = self.game_controller.game_state
+  print("Game state:", game_state.current_state)
+  print("Turn substep:", game_state.turn_substep)
+
+  -- Block input during animations (both flag and animation substeps)
+  if self.game_controller.animating then
+    print("BLOCKED: Animation flag is true")
+    return
+  end
+
+  if game_state.turn_substep == Constants.TURN_SUBSTEPS.ANIMATING_DRAW or
+     game_state.turn_substep == Constants.TURN_SUBSTEPS.ANIMATING_DISCARD then
+    print("BLOCKED: Animation substep active")
+    return
+  end
 
   if game_state.current_state == Constants.STATES.PLAYER_TURN then
     if game_state.turn_substep == Constants.TURN_SUBSTEPS.CHOOSE_ACTION then
+      print("Calling handleChooseAction")
       self:handleChooseAction(x, y)
     elseif game_state.turn_substep == Constants.TURN_SUBSTEPS.DISCARD_PHASE then
+      print("Calling handleDiscardPhase")
       self:handleDiscardPhase(x, y)
+    else
+      print("Unknown substep:", game_state.turn_substep)
     end
+  else
+    print("Not PLAYER_TURN state")
   end
 end
 
@@ -50,8 +72,14 @@ end
 function InputController:updateHover()
   local game_state = self.game_controller.game_state
 
-  -- Block hover during animations
+  -- Block hover during animations (both flag and animation substeps)
   if self.game_controller.animating then
+    self:clearHover()
+    return
+  end
+
+  if game_state.turn_substep == Constants.TURN_SUBSTEPS.ANIMATING_DRAW or
+     game_state.turn_substep == Constants.TURN_SUBSTEPS.ANIMATING_DISCARD then
     self:clearHover()
     return
   end
@@ -133,24 +161,8 @@ function InputController:handleChooseAction(x, y)
 
   -- Check if clicked on deck
   if self:isPointInCard(x, y, Constants.DECK_X, Constants.DECK_Y, CARD_SCALE) and not game_state:isDeckEmpty() then
-    print("Clicked deck - drawing card with animation")
-    local card = game_state.deck:draw()
-    if card then
-      card.face_up = true
-
-      local player = game_state:getCurrentPlayer()
-      local hand_size = #player.hand
-      local center_x = Constants.SCREEN_WIDTH / 2
-      local card_spacing = Constants.CARD_WIDTH
-      -- Calculate position for new hand size (current + 1 card being drawn)
-      local new_hand_size = hand_size + 1
-      local total_width = (new_hand_size - 1) * card_spacing
-      local start_x = center_x - total_width / 2
-      local target_x = start_x + hand_size * card_spacing
-      local target_y = Constants.SCREEN_HEIGHT - 70
-
-      self.game_controller:startDrawAnimation(card, target_x, target_y)
-    end
+    print("Clicked deck - drawing card")
+    self.game_controller:drawCard()
     return
   end
 

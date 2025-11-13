@@ -86,16 +86,12 @@ function GameController:drawCard()
   if card then
     local player = self.game_state:getCurrentPlayer()
 
-    if player.type == "human" then
-      -- Human player already uses animation via InputController
-      player:addCardToHand(card)
-      self.game_state.turn_substep = Constants.TURN_SUBSTEPS.DISCARD_PHASE
-    else
-      -- AI player: use animation
-      card.face_up = false
-      local target_x, target_y, rotation = self:calculateCardTargetPosition(player)
-      self:startDrawAnimation(card, target_x, target_y, rotation)
-    end
+    -- Set face_up based on player type
+    card.face_up = (player.type == "human")
+
+    -- Calculate target position and start animation
+    local target_x, target_y, rotation = self:calculateCardTargetPosition(player)
+    self:startDrawAnimation(card, target_x, target_y, rotation)
   end
 end
 
@@ -185,6 +181,12 @@ function GameController:calculateCardTargetPosition(player)
 end
 
 function GameController:startDrawAnimation(card, target_x, target_y, rotation)
+  print("=== START DRAW ANIMATION ===")
+  print("Card:", card)
+  print("From:", Constants.DECK_X, Constants.DECK_Y)
+  print("To:", target_x, target_y)
+  print("Rotation:", rotation or 0)
+
   self.animating = true
   self.animation_card = card
   self.game_state.turn_substep = Constants.TURN_SUBSTEPS.ANIMATING_DRAW
@@ -198,6 +200,7 @@ function GameController:startDrawAnimation(card, target_x, target_y, rotation)
   rotation = rotation or 0
 
   flux.to(card, 0.3, { x = target_x, y = target_y, rotation = rotation }):oncomplete(function()
+    print("=== DRAW ANIMATION COMPLETE ===")
     self:onDrawAnimationComplete(card)
   end)
 end
