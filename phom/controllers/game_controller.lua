@@ -56,8 +56,14 @@ function GameController:handleDealing()
     self.game_state:addToDiscard(first_discard)
   end
 
-  self.game_state.current_state = Constants.STATES.PLAYER_TURN
-  self.game_state.turn_substep = Constants.TURN_SUBSTEPS.CHOOSE_ACTION
+  -- Set initial state based on who starts (current_player_index was randomized)
+  local starting_player = self.game_state:getCurrentPlayer()
+  if starting_player.type == "human" then
+    self.game_state.current_state = Constants.STATES.PLAYER_TURN
+    self.game_state.turn_substep = Constants.TURN_SUBSTEPS.CHOOSE_ACTION
+  else
+    self.game_state.current_state = Constants.STATES.AI_TURN
+  end
 end
 
 function GameController:handlePlayerTurn()
