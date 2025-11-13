@@ -142,8 +142,10 @@ function InputController:handleChooseAction(x, y)
       local hand_size = #player.hand
       local center_x = Constants.SCREEN_WIDTH / 2
       local card_spacing = Constants.CARD_WIDTH
-      local total_hand_width = hand_size * card_spacing
-      local start_x = center_x - total_hand_width / 2
+      -- Calculate position for new hand size (current + 1 card being drawn)
+      local new_hand_size = hand_size + 1
+      local total_width = (new_hand_size - 1) * card_spacing
+      local start_x = center_x - total_width / 2
       local target_x = start_x + hand_size * card_spacing
       local target_y = Constants.SCREEN_HEIGHT - 70
 
