@@ -1822,7 +1822,7 @@ Add simple AI that draws and discards highest-value cards"
 - `phom/views/game_view.lua`: Store card positions/rotation for animations, render animation_card
 - `phom/utils/constants.lua`: Accurate DECK_X/Y, DISCARD_X/Y positions
 
-#### Commits:
+#### Commits (Animation System):
 - `7439be1`: Add animation state tracking fields
 - `2311175`: Implement draw animation
 - `e175bf5`: Block input during animations
@@ -1836,6 +1836,49 @@ Add simple AI that draws and discards highest-value cards"
 - `4a3f8af`: Clear card properties at animation start
 - `0938bcd`: Fix human player draw animation position calculation
 - `950c94d`: Unify draw/discard flow and fix AI animation timing
+
+### Game Flow Improvements (Completed)
+
+**8. Deck Empty End Game Logic**
+- Fixed game ending too early when deck becomes empty
+- Player who draws last card can now complete their turn (draw + discard)
+- Deck empty check moved to after `nextPlayer()` but before new player draws
+
+**9. Random Starting Player**
+- Changed `current_player_index` from hardcoded `1` to `math.random(1, 4)` in GameState.new()
+- Each game now starts with a random player (1-4)
+- Makes game feel more fair and adds variety
+
+**10. Turn Indicator Visual**
+- Added `drawTurnIndicator()` to GameView
+- Yellow arrow points to current player's area
+- Shows "YOUR TURN" for human player, "AI TURN" for AI players
+- Arrow direction matches player position (down/left/up/right)
+- Provides clear visual feedback about game state
+
+**11. AI First Turn Support**
+- Fixed `handleDealing()` to set correct initial state based on starting player
+- If starting player is human → `PLAYER_TURN`
+- If starting player is AI → `AI_TURN`
+- AI players can now properly take the first turn when randomly selected
+
+#### Files Modified (Game Flow):
+- `phom/controllers/game_controller.lua`: Deck empty check timing, initial state logic
+- `phom/models/game_state.lua`: Random starting player
+- `phom/views/game_view.lua`: Turn indicator visual
+
+#### Commits (Game Flow):
+- `033d5bc`: Fix deck empty check to allow last player to complete turn
+- `2746d20`: Randomize starting player and add turn indicator
+- `1567f15`: Start game with correct state when AI player goes first
+- `2722a54`: Update implementation plan with animation system progress
+
+### Known Issues:
+
+**Random Number Generation:**
+- `math.random()` for starting player selection may produce predictable sequences
+- RNG is seeded in `love.load()` but may need additional entropy or warm-up calls
+- **Status**: Deferred - needs proper solution, not a hack
 
 ---
 
