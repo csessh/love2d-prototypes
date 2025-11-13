@@ -6,14 +6,16 @@
 
 ## Project Overview
 
-A playable prototype of Phỏm, a Vietnamese card game for 4 players. This implementation features 1 human player vs 3 AI opponents with rule-based strategy using behavior trees.
+A playable prototype of Phỏm, a Vietnamese card game for 4 players. This implementation features 1 human player vs 3 AI opponents with simple rule-based strategy.
 
 **Key Features:**
 - MVC architecture with state machine for game flow
-- Basic card sprites with fan-out hand layout
-- Smooth animations using flux tween library
-- Rule-based AI with point-minimization strategy
+- Individual card sprite images with horizontal hand layout
+- Smooth hover animations using flux tween library
+- Simple AI opponents (draw and discard highest-value cards)
 - Complete Phỏm rules implementation
+
+**Implementation Status:** ✅ Tasks 1-13 Complete (Core Gameplay Functional)
 
 ## Game Rules Summary
 
@@ -28,23 +30,23 @@ Each turn consists of:
 
 1. **Choose Action** (pick one):
    - **Draw from Deck**: Take top card from deck → go to discard phase
-   - **Form Meld**: Take top discard card + form valid meld with hand cards
+   - **Form Hand**: Take top discard card + form valid hand with hand cards
 
 2. **Discard Phase**:
    - Must discard one card from hand (if hand not empty)
    - Discard goes to top of discard pile
 
-### Meld Rules
+### Hand Rules
 
-**Valid Meld Types:**
+**Valid Hand Types:**
 - **Sets**: 3+ cards of same rank, any suits (e.g., 7♥ 7♦ 7♣)
 - **Sequences**: 3+ consecutive ranks, same suit (e.g., 6♥ 7♥ 8♥)
-  - Ace is HIGH only (Q-K-A valid, A-2-3 invalid)
+  - **Ace is LOWEST rank (rank 1)**: A-2-3-4 is valid, J-Q-K-A is invalid
   - No wrap-around sequences
 
-**Meld Formation:**
-- When forming meld, only the discard card is placed face-up in player's meld area
-- Cards from hand used in meld are hidden until game end
+**Hand Formation:**
+- When forming hand, only the discard card is placed face-up in player's hand area
+- Cards from hand used in the formed hand are hidden until game end
 - This creates hidden information gameplay
 
 ### Scoring System
@@ -69,7 +71,7 @@ Each turn consists of:
 
 **MVC + State Machine Hybrid:**
 
-- **Model Layer**: Game logic, data structures (GameState, Player, Card, Deck, MeldValidator)
+- **Model Layer**: Game logic, data structures (GameState, Player, Card, Deck, HandValidator)
 - **View Layer**: Rendering (CardRenderer, GameView, UIElements)
 - **Controller Layer**: Game flow orchestration (GameController with state machine, InputController, AIController)
 
@@ -105,7 +107,7 @@ GAME_OVER (show scores)
 ```lua
 Card = {
   suit = "hearts" | "diamonds" | "clubs" | "spades",
-  rank = 2..14 (11=J, 12=Q, 13=K, 14=A),
+  rank = 1..13 (11=J, 12=Q, 13=K, 14=A),
   id = unique_id
 }
 ```
@@ -116,11 +118,11 @@ Player = {
   id = 1..4,
   type = "human" | "ai",
   hand = {Card, ...},
-  melds = {
+  hands = {
     {type="set"|"sequence", cards={Card, ...}, visible_card=Card},
     ...
   },
-  meld_area_cards = {Card, ...}  -- face-up discard cards
+  hand_area_cards = {Card, ...}  -- face-up discard cards
 }
 ```
 
@@ -139,7 +141,7 @@ GameState = {
 }
 ```
 
-### MeldValidator
+### HandValidator
 
 **Functions:**
 - `isValidSet(cards)` - Check if 3+ cards, all same rank
@@ -224,29 +226,20 @@ Keep: A♥ (only 1 point, cheap to hold)
 
 ### Card Rendering
 
-**Sprites:**
-- Card sprite images from `assets/sprites/cards/`
-- Card back sprite for face-down cards
-- Naming: `card_<suit>_<rank>.png` or sprite sheet
+**Individual Card Images:**
+- Card images from `assets/sprites/cards/`
+- Naming pattern: `card_<suit>_<face_value>.png`
+  - Suits: hearts, diamonds, clubs, spades (lowercase)
+  - Face values: A, 02-10, J, Q, K (zero-padded for 2-9)
+  - Examples: `card_hearts_A.png`, `card_spades_K.png`, `card_diamonds_10.png`
+- Card back: `card_back.png` for face-down cards
+- All cards scaled 2x for visibility
 
-**Fan Layout Algorithm:**
-```lua
-function layoutHandAsFan(cards, center_x, center_y, is_face_up)
-  local card_count = #cards
-  local fan_spread_angle = 30  -- degrees total spread
-  local card_spacing = fan_spread_angle / math.max(1, card_count - 1)
-
-  for i, card in ipairs(cards) do
-    local angle_offset = -fan_spread_angle/2 + (i-1) * card_spacing
-    local angle_rad = math.rad(angle_offset)
-
-    card.x = center_x + math.sin(angle_rad) * 50
-    card.y = center_y - (1 - math.abs(angle_rad) * 2) * 20
-    card.rotation = angle_rad
-    card.face_up = is_face_up
-  end
-end
-```
+**Horizontal Hand Layout:**
+- Human player: Cards displayed in a horizontal row at bottom of screen
+- Cards positioned touching with no spacing
+- Hover effect: Cards raise by 15% of card height when mouse hovers
+- AI players: Face-down cards in vertical (left/right) or horizontal (top) layouts
 
 ### Visual States
 
@@ -372,7 +365,7 @@ end
 
 ### Phase 1: Core Models
 - Card, Deck, Player data structures
-- MeldValidator logic
+- HandValidator logic
 - GameState management
 
 ### Phase 2: Basic Rendering
@@ -404,6 +397,56 @@ end
 - Playtest full games
 - Balance AI difficulty
 - Bug fixes and edge cases
+
+## Implementation Status
+
+### ✅ Completed (Tasks 1-13)
+
+**Phase 1: Core Models** ✅
+- Card model with rank 1-13 (Ace is lowest)
+- Deck model with shuffle and draw
+- HandValidator (renamed from MeldValidator) with set and sequence validation
+- Player model with hand management and scoring
+- GameState model with turn management
+
+**Phase 2: Basic Rendering** ✅
+- CardRenderer loading individual card images
+- Basic table layout with all 4 players visible
+- 2x card scaling for visibility
+
+**Phase 3: Game Flow** ✅
+- GameController with complete state machine
+- Turn management and state transitions
+- Win condition checking (empty hand or empty deck)
+
+**Phase 4: Player Input** ✅
+- InputController with mouse click handling
+- Deck drawing functionality
+- Card discarding functionality
+- Hover effects: Cards raise 15% on mouse hover with smooth animation
+
+**Phase 5: AI Implementation** ✅
+- Simple AI controller with 1-second think time
+- Strategy: Draw from deck, discard highest-value card
+- Automatic turn progression
+
+**Phase 6: Animations & Polish** 🟡 Partial
+- Flux integration ✅
+- Hover animations ✅
+- Card movement animations ⏳ (pending)
+- Visual feedback ⏳ (pending)
+
+### 🎮 Current State
+The game is **fully playable** with core mechanics working:
+- Deal cards to 4 players
+- Human player can draw from deck and discard cards
+- 3 AI opponents automatically take turns
+- Win conditions enforced (empty hand or deck empty)
+- Scoring system implemented
+- Mouse controls with hover effects
+
+### ⏳ Future Work
+See "Future Enhancements" section below for planned additions.
 
 ## Future Enhancements (Out of Scope)
 
