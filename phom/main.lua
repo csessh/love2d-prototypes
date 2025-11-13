@@ -1,9 +1,9 @@
 local flux = require("libraries/flux")
+local Constants = require("utils/constants")
 
 function love.load()
   love.graphics.setDefaultFilter("nearest", "nearest")
   print("Phom Card Game - Loading...")
-  print("Flux loaded:", flux ~= nil)
 end
 
 function love.update(dt)
