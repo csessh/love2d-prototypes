@@ -1,11 +1,9 @@
 local Constants = require("utils/constants")
-local flux = require("libraries/flux")
+local Flux = require("libraries/flux")
 
+local CARD_SCALE = 2
 local InputController = {}
 InputController.__index = InputController
-
--- Card scale constant (must match GameView)
-local CARD_SCALE = 2
 
 function InputController.new(game_controller)
   local instance = {
@@ -15,11 +13,11 @@ function InputController.new(game_controller)
     mouse_x = 0,
     mouse_y = 0,
   }
+
   return setmetatable(instance, InputController)
 end
 
 function InputController:update(dt)
-  -- Update hover detection based on mouse position
   self:updateHover()
 end
 
@@ -37,14 +35,17 @@ function InputController:mousepressed(x, y, button)
   print("Game state:", game_state.current_state)
   print("Turn substep:", game_state.turn_substep)
 
-  -- Block input during animations (both flag and animation substeps)
   if self.game_controller.animating then
     print("BLOCKED: Animation flag is true")
     return
   end
 
-  if game_state.turn_substep == Constants.TURN_SUBSTEPS.ANIMATING_DRAW or
-     game_state.turn_substep == Constants.TURN_SUBSTEPS.ANIMATING_DISCARD then
+  if game_state.turn_substep == Constants.TURN_SUBSTEPS.ANIMATING_DISCARD then
+    print("BLOCKED: Animation substep active")
+    return
+  end
+
+  if game_state.turn_substep == Constants.TURN_SUBSTEPS.ANIMATING_DRAW then
     print("BLOCKED: Animation substep active")
     return
   end
@@ -72,19 +73,21 @@ end
 function InputController:updateHover()
   local game_state = self.game_controller.game_state
 
-  -- Block hover during animations (both flag and animation substeps)
   if self.game_controller.animating then
     self:clearHover()
     return
   end
 
-  if game_state.turn_substep == Constants.TURN_SUBSTEPS.ANIMATING_DRAW or
-     game_state.turn_substep == Constants.TURN_SUBSTEPS.ANIMATING_DISCARD then
+  if game_state.turn_substep == Constants.TURN_SUBSTEPS.ANIMATING_DRAW then
     self:clearHover()
     return
   end
 
-  -- Only apply hover effects during player turn for human player
+  if game_state.turn_substep == Constants.TURN_SUBSTEPS.ANIMATING_DISCARD then
+    self:clearHover()
+    return
+  end
+
   if game_state.current_state ~= Constants.STATES.PLAYER_TURN then
     self:clearHover()
     return
@@ -124,7 +127,7 @@ function InputController:updateHover()
       local prev_card = player.hand[self.hovered_card_index]
       if prev_card and prev_card.hover_offset_y then
         -- Animate back down
-        flux.to(prev_card, 0.1, { hover_offset_y = 0 })
+        Flux.to(prev_card, 0.1, { hover_offset_y = 0 })
       end
     end
 
@@ -137,7 +140,7 @@ function InputController:updateHover()
       end
       -- Animate up by 15% of card height
       local hover_offset = -(Constants.CARD_HEIGHT * CARD_SCALE * 0.15)
-      flux.to(card, 0.1, { hover_offset_y = hover_offset })
+      Flux.to(card, 0.1, { hover_offset_y = hover_offset })
     end
   end
 end
@@ -149,7 +152,7 @@ function InputController:clearHover()
     if player and player.hand[self.hovered_card_index] then
       local card = player.hand[self.hovered_card_index]
       if card.hover_offset_y then
-        flux.to(card, 0.1, { hover_offset_y = 0 })
+        Flux.to(card, 0.1, { hover_offset_y = 0 })
       end
     end
     self.hovered_card_index = nil
@@ -159,8 +162,10 @@ end
 function InputController:handleChooseAction(x, y)
   local game_state = self.game_controller.game_state
 
-  -- Check if clicked on deck
-  if self:isPointInCard(x, y, Constants.DECK_X, Constants.DECK_Y, CARD_SCALE) and not game_state:isDeckEmpty() then
+  if
+    self:isPointInCard(x, y, Constants.DECK_X, Constants.DECK_Y, CARD_SCALE)
+    and not game_state:isDeckEmpty()
+  then
     print("Clicked deck - drawing card")
     self.game_controller:drawCard()
     return
@@ -189,7 +194,7 @@ function InputController:handleDiscardPhase(x, y)
     if self:isPointInCard(x, y, card_x, card_y, CARD_SCALE) then
       print("Discarding card with animation:", card)
       self.game_controller:startDiscardAnimation(card)
-      self:clearHover()  -- Clear hover when discarding
+      self:clearHover() -- Clear hover when discarding
       return
     end
   end
@@ -200,8 +205,10 @@ function InputController:isPointInCard(px, py, card_x, card_y, scale)
   local half_w = (Constants.CARD_WIDTH * scale) / 2
   local half_h = (Constants.CARD_HEIGHT * scale) / 2
 
-  return px >= card_x - half_w and px <= card_x + half_w and
-         py >= card_y - half_h and py <= card_y + half_h
+  return px >= card_x - half_w
+    and px <= card_x + half_w
+    and py >= card_y - half_h
+    and py <= card_y + half_h
 end
 
 return InputController

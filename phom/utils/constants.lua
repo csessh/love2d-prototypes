@@ -11,34 +11,54 @@ Constants.CARD_HEIGHT = 96
 -- Deck and discard pile positions (calculated to match GameView rendering)
 -- CARD_SCALE = 2, spacing = 20
 -- total_width = (CARD_WIDTH * CARD_SCALE * 2) + spacing = 304
-Constants.DECK_X = 559  -- SCREEN_WIDTH / 2 - total_width / 2 + (CARD_WIDTH * CARD_SCALE / 2)
-Constants.DECK_Y = 360  -- SCREEN_HEIGHT / 2
-Constants.DISCARD_X = 721  -- SCREEN_WIDTH / 2 + total_width / 2 - (CARD_WIDTH * CARD_SCALE / 2)
-Constants.DISCARD_Y = 360  -- SCREEN_HEIGHT / 2
+Constants.DECK_X = 559 -- SCREEN_WIDTH / 2 - total_width / 2 + (CARD_WIDTH * CARD_SCALE / 2)
+Constants.DECK_Y = 360 -- SCREEN_HEIGHT / 2
+Constants.DISCARD_X = 721 -- SCREEN_WIDTH / 2 + total_width / 2 - (CARD_WIDTH * CARD_SCALE / 2)
+Constants.DISCARD_Y = 360 -- SCREEN_HEIGHT / 2
 
 -- Card suits
-Constants.SUITS = {"hearts", "diamonds", "clubs", "spades"}
+Constants.SUITS = { "hearts", "diamonds", "clubs", "spades" }
 Constants.SUIT_SYMBOLS = {
   hearts = "♥",
   diamonds = "♦",
   clubs = "♣",
-  spades = "♠"
+  spades = "♠",
 }
 
 -- Card ranks (1-13, where 1=A, 11=J, 12=Q, 13=K)
 -- Ace is LOWEST rank. A-2-3-4 valid, J-Q-K-A invalid (no wrap)
-Constants.RANKS = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
+Constants.RANKS = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 }
 Constants.RANK_NAMES = {
-  [1]="A", [2]="2", [3]="3", [4]="4", [5]="5", [6]="6",
-  [7]="7", [8]="8", [9]="9", [10]="10",
-  [11]="J", [12]="Q", [13]="K"
+  [1] = "A",
+  [2] = "2",
+  [3] = "3",
+  [4] = "4",
+  [5] = "5",
+  [6] = "6",
+  [7] = "7",
+  [8] = "8",
+  [9] = "9",
+  [10] = "10",
+  [11] = "J",
+  [12] = "Q",
+  [13] = "K",
 }
 
 -- Card point values (Ace = 1 point)
 Constants.CARD_POINTS = {
-  [1]=1, [2]=2, [3]=3, [4]=4, [5]=5, [6]=6,
-  [7]=7, [8]=8, [9]=9, [10]=10,
-  [11]=11, [12]=12, [13]=13
+  [1] = 1,
+  [2] = 2,
+  [3] = 3,
+  [4] = 4,
+  [5] = 5,
+  [6] = 6,
+  [7] = 7,
+  [8] = 8,
+  [9] = 9,
+  [10] = 10,
+  [11] = 11,
+  [12] = 12,
+  [13] = 13,
 }
 
 -- Game states
@@ -48,7 +68,7 @@ Constants.STATES = {
   PLAYER_TURN = "PLAYER_TURN",
   AI_TURN = "AI_TURN",
   ROUND_END = "ROUND_END",
-  GAME_OVER = "GAME_OVER"
+  GAME_OVER = "GAME_OVER",
 }
 
 -- Turn substeps
@@ -58,25 +78,23 @@ Constants.TURN_SUBSTEPS = {
   FORM_MELD = "FORM_MELD",
   DISCARD_PHASE = "DISCARD_PHASE",
   ANIMATING_DISCARD = "ANIMATING_DISCARD",
-  CHECK_WIN = "CHECK_WIN"
+  CHECK_WIN = "CHECK_WIN",
 }
 
 -- Player positions
 Constants.POSITIONS = {
-  BOTTOM = "BOTTOM",  -- Human
-  LEFT = "LEFT",      -- AI 1
-  TOP = "TOP",        -- AI 2
-  RIGHT = "RIGHT"     -- AI 3
+  BOTTOM = "BOTTOM", -- Human
+  LEFT = "LEFT", -- AI 1
+  TOP = "TOP", -- AI 2
+  RIGHT = "RIGHT", -- AI 3
 }
+
+Constants.MAX_PLAYER_COUNT = 4
 
 -- Animation durations (seconds)
 Constants.ANIM_DEAL = 0.3
 Constants.ANIM_DRAW = 0.2
 Constants.ANIM_DISCARD = 0.25
 Constants.ANIM_MELD = 0.3
-
--- Fan layout
-Constants.FAN_SPREAD_ANGLE = 30  -- degrees
-Constants.FAN_RADIUS = 400
 
 return Constants

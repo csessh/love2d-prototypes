@@ -7,15 +7,15 @@ GameState.__index = GameState
 
 function GameState.new()
   local instance = {
+    current_player_index = math.random(1, Constants.MAX_PLAYER_COUNT),
+    current_state = Constants.STATES.MENU,
     deck = Deck.new(),
     discard_pile = {},
     players = {},
-    current_player_index = math.random(1, 4),  -- Random starting player
-    current_state = Constants.STATES.MENU,
-    turn_substep = nil,
-    selected_cards = {},
     round_number = 1,
-    scores = {}
+    scores = {},
+    selected_cards = {},
+    turn_substep = nil,
   }
   setmetatable(instance, GameState)
   instance:initializePlayers()
@@ -27,7 +27,7 @@ function GameState:initializePlayers()
     Player.new(1, "human", Constants.POSITIONS.BOTTOM),
     Player.new(2, "ai", Constants.POSITIONS.LEFT),
     Player.new(3, "ai", Constants.POSITIONS.TOP),
-    Player.new(4, "ai", Constants.POSITIONS.RIGHT)
+    Player.new(4, "ai", Constants.POSITIONS.RIGHT),
   }
 end
 
@@ -36,7 +36,9 @@ function GameState:getCurrentPlayer()
 end
 
 function GameState:nextPlayer()
-  self.current_player_index = self.current_player_index % 4 + 1
+  self.current_player_index = self.current_player_index
+      % Constants.MAX_PLAYER_COUNT
+    + 1
 end
 
 function GameState:getTopDiscard()
@@ -64,7 +66,7 @@ end
 function GameState:dealCards(cards_per_player)
   self.deck:shuffle()
 
-  for i = 1, cards_per_player do
+  for _ = 1, cards_per_player do
     for _, player in ipairs(self.players) do
       local card = self.deck:draw()
       if card then

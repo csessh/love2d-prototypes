@@ -1,5 +1,5 @@
 local Constants = require("utils/constants")
-local HandValidator = require("models/hand_validator")
+local HandValidator = require("utils/hand_validator")
 
 local AIController = {}
 AIController.__index = AIController
@@ -19,19 +19,18 @@ function AIController:update(dt)
   local game_state = self.game_controller.game_state
 
   if game_state.current_state == Constants.STATES.AI_TURN then
-    -- If waiting for animation to complete, check if we can discard now
     if self.waiting_for_animation then
       if game_state.turn_substep == Constants.TURN_SUBSTEPS.DISCARD_PHASE then
-        -- Draw animation completed, now choose card to discard from new hand
         local ai_player = game_state:getCurrentPlayer()
         local highest_card = self:findHighestPointCard(ai_player.hand)
+
         if highest_card then
           self.game_controller:discardCard(highest_card)
         end
+
         self.waiting_for_animation = false
       end
     else
-      -- Normal AI thinking logic
       self.think_timer = self.think_timer + dt
 
       if self.think_timer >= self.think_duration then
@@ -46,7 +45,6 @@ function AIController:makeMove()
   -- Simple AI: just draw and discard
   -- TODO: Implement behavior tree
 
-  -- Start draw (will trigger animation)
   self.game_controller:drawCard()
 
   -- Wait for draw animation to complete before discarding

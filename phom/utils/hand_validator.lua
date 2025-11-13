@@ -1,5 +1,3 @@
-local Constants = require("utils/constants")
-
 local HandValidator = {}
 
 function HandValidator.isValidSet(cards)

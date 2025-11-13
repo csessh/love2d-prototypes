@@ -1,7 +1,7 @@
-local Constants = require("utils/constants")
-local GameState = require("models/game_state")
 local AIController = require("controllers/ai_controller")
-local flux = require("libraries/flux")
+local Constants = require("utils/constants")
+local Flux = require("libraries/flux")
+local GameState = require("models/game_state")
 
 local GameController = {}
 GameController.__index = GameController
@@ -20,7 +20,7 @@ function GameController.new()
 end
 
 function GameController:update(dt)
-  flux.update(dt)
+  Flux.update(dt)
   self.ai_controller:update(dt)
 
   if self.game_state.current_state == Constants.STATES.MENU then
@@ -91,12 +91,11 @@ function GameController:drawCard()
   local card = self.game_state.deck:draw()
   if card then
     local player = self.game_state:getCurrentPlayer()
-
-    -- Set face_up based on player type
     card.face_up = (player.type == "human")
 
-    -- Calculate target position and start animation
-    local target_x, target_y, rotation = self:calculateCardTargetPosition(player)
+    local target_x, target_y, rotation =
+      self:calculateCardTargetPosition(player)
+
     self:startDrawAnimation(card, target_x, target_y, rotation)
   end
 end
@@ -125,8 +124,6 @@ function GameController:endTurn()
 
   self.game_state:nextPlayer()
 
-  -- Check if deck is empty AFTER moving to next player but BEFORE they draw
-  -- This allows the player who drew the last card to complete their turn
   if self.game_state:isDeckEmpty() then
     self.game_state.current_state = Constants.STATES.ROUND_END
     return
@@ -154,7 +151,6 @@ function GameController:calculateCardTargetPosition(player)
     local target_x = start_x + hand_size * card_spacing
     local target_y = center_y
     return target_x, target_y, rotation
-
   elseif player.position == Constants.POSITIONS.LEFT then
     local x = 150
     local center_y = Constants.SCREEN_HEIGHT / 2
@@ -164,7 +160,6 @@ function GameController:calculateCardTargetPosition(player)
     local target_y = start_y + hand_size * card_spacing
     rotation = math.pi / 2
     return target_x, target_y, rotation
-
   elseif player.position == Constants.POSITIONS.TOP then
     local center_x = Constants.SCREEN_WIDTH / 2
     local y = 120
@@ -173,7 +168,6 @@ function GameController:calculateCardTargetPosition(player)
     local target_x = start_x + hand_size * card_spacing
     local target_y = y
     return target_x, target_y, rotation
-
   elseif player.position == Constants.POSITIONS.RIGHT then
     local x = Constants.SCREEN_WIDTH - 150
     local center_y = Constants.SCREEN_HEIGHT / 2
@@ -203,14 +197,15 @@ function GameController:startDrawAnimation(card, target_x, target_y, rotation)
   card.x = Constants.DECK_X
   card.y = Constants.DECK_Y
   card.rotation = 0
-  card.hover_offset_y = 0  -- Clear any hover offset
+  card.hover_offset_y = 0 -- Clear any hover offset
 
   rotation = rotation or 0
 
-  flux.to(card, 0.3, { x = target_x, y = target_y, rotation = rotation }):oncomplete(function()
-    print("=== DRAW ANIMATION COMPLETE ===")
-    self:onDrawAnimationComplete(card)
-  end)
+  Flux.to(card, 0.3, { x = target_x, y = target_y, rotation = rotation })
+    :oncomplete(function()
+      print("=== DRAW ANIMATION COMPLETE ===")
+      self:onDrawAnimationComplete(card)
+    end)
 end
 
 function GameController:onDrawAnimationComplete(card)
@@ -227,28 +222,25 @@ function GameController:startDiscardAnimation(card)
   self.animation_card = card
   self.game_state.turn_substep = Constants.TURN_SUBSTEPS.ANIMATING_DISCARD
 
-  -- Remove card from hand immediately so it's not drawn in hand during animation
   local player = self.game_state:getCurrentPlayer()
   player:removeCardFromHand(card)
-
-  -- Flip card face up for discard pile
   card.face_up = true
 
   -- Card position should already be set by GameView
   -- Start animation from current position to discard pile
   -- Rotation animates to 0 for AI players, stays at 0 for human players
-  flux
-    .to(card, 0.25, { x = Constants.DISCARD_X, y = Constants.DISCARD_Y, rotation = 0 })
-    :oncomplete(function()
-      self:onDiscardAnimationComplete(card)
-    end)
+  Flux.to(card, 0.25, {
+    x = Constants.DISCARD_X,
+    y = Constants.DISCARD_Y,
+    rotation = 0,
+  }):oncomplete(function()
+    self:onDiscardAnimationComplete(card)
+  end)
 end
 
 function GameController:onDiscardAnimationComplete(card)
   self.game_state:addToDiscard(card)
-
   self:endTurn()
-
   self.animating = false
   self.animation_card = nil
 end

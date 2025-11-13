@@ -863,7 +863,7 @@ Create new file with selection tracking:
 
 ```lua
 local Constants = require("utils/constants")
-local HandValidator = require("models/hand_validator")
+local HandValidator = require("utils/hand_validator")
 
 local EndGameUI = {}
 EndGameUI.__index = EndGameUI
@@ -1360,7 +1360,7 @@ Add to AIController:
 
 ```lua
 function AIController:findLargestValidHand(cards)
-  local HandValidator = require("models/hand_validator")
+  local HandValidator = require("utils/hand_validator")
 
   -- Try from largest to smallest (down to 3 cards)
   for len = #cards, 3, -1 do
