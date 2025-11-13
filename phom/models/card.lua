@@ -12,7 +12,7 @@ function Card.new(suit, rank)
     y = 0,
     rotation = 0,
     scale = 1,
-    face_up = true
+    face_up = true,
   }
   return setmetatable(instance, Card)
 end

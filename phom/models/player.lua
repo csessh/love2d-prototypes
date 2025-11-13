@@ -1,16 +1,14 @@
-local Constants = require("utils/constants")
-
 local Player = {}
 Player.__index = Player
 
 function Player.new(id, player_type, position)
   local instance = {
     id = id,
-    type = player_type, -- "human" or "ai"
-    position = position, -- "BOTTOM", "LEFT", "TOP", "RIGHT"
+    type = player_type,
+    position = position,
     hand = {},
-    hands = {}, -- {type="set"|"sequence", cards={}, visible_card=Card}
-    hand_area_cards = {}, -- face-up discard cards taken
+    hands = {},
+    hand_area_cards = {},
     score = 0,
   }
   return setmetatable(instance, Player)
@@ -48,7 +46,6 @@ function Player:formHand(hand_type, cards, visible_card)
   table.insert(self.hands, hand_obj)
   table.insert(self.hand_area_cards, visible_card)
 
-  -- Remove hand cards from hand (except visible card already removed)
   for _, card in ipairs(cards) do
     if card.id ~= visible_card.id then
       self:removeCardFromHand(card)

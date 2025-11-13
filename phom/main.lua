@@ -1,7 +1,7 @@
-local flux = require("libraries/flux")
 local GameController = require("controllers/game_controller")
-local InputController = require("controllers/input_controller")
 local GameView = require("views/game_view")
+local InputController = require("controllers/input_controller")
+local Flux = require("libraries/flux")
 
 local game_controller
 local input_controller
@@ -16,7 +16,7 @@ function love.load()
 end
 
 function love.update(dt)
-  flux.update(dt)
+  Flux.update(dt)
   game_controller:update(dt)
   input_controller:update(dt)
 end

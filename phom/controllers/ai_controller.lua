@@ -8,7 +8,7 @@ function AIController.new(game_controller)
   local instance = {
     game_controller = game_controller,
     think_timer = 0,
-    think_duration = 1.0  -- AI waits 1 second before acting
+    think_duration = 1.0,
   }
   return setmetatable(instance, AIController)
 end
@@ -33,10 +33,8 @@ function AIController:makeMove()
   -- Simple AI: just draw and discard
   -- TODO: Implement behavior tree
 
-  -- Draw card from deck
   self.game_controller:drawCard()
 
-  -- Discard highest point card (simple strategy)
   local highest_card = self:findHighestPointCard(ai_player.hand)
   if highest_card then
     self.game_controller:discardCard(highest_card)
@@ -44,7 +42,9 @@ function AIController:makeMove()
 end
 
 function AIController:findHighestPointCard(hand)
-  if #hand == 0 then return nil end
+  if #hand == 0 then
+    return nil
+  end
 
   local highest = hand[1]
   for _, card in ipairs(hand) do

@@ -6,7 +6,7 @@ Deck.__index = Deck
 
 function Deck.new()
   local instance = {
-    cards = {}
+    cards = {},
   }
   setmetatable(instance, Deck)
   instance:initialize()

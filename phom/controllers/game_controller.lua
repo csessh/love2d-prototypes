@@ -9,7 +9,7 @@ function GameController.new()
   local instance = {
     game_state = GameState.new(),
     animation_queue = {},
-    ai_controller = nil  -- Will be set after creation
+    ai_controller = nil,
   }
   setmetatable(instance, GameController)
   instance.ai_controller = AIController.new(instance)
@@ -17,10 +17,8 @@ function GameController.new()
 end
 
 function GameController:update(dt)
-  -- Update AI
   self.ai_controller:update(dt)
 
-  -- Handle state machine
   if self.game_state.current_state == Constants.STATES.MENU then
     self:handleMenu()
   elseif self.game_state.current_state == Constants.STATES.DEALING then
@@ -35,7 +33,6 @@ function GameController:update(dt)
 end
 
 function GameController:handleMenu()
-  -- Auto-start for now
   self:startNewRound()
 end
 
@@ -46,15 +43,15 @@ end
 
 function GameController:handleDealing()
   -- Deal cards (no animation for now)
+  -- TODO: Add drawing animations
   self.game_state:dealCards(9)
 
-  -- Add first card to discard pile
+  -- TODO: This might not be correct. Review later.
   local first_discard = self.game_state.deck:draw()
   if first_discard then
     self.game_state:addToDiscard(first_discard)
   end
 
-  -- Move to first player turn
   self.game_state.current_state = Constants.STATES.PLAYER_TURN
   self.game_state.turn_substep = Constants.TURN_SUBSTEPS.CHOOSE_ACTION
 end
@@ -68,7 +65,10 @@ function GameController:handleRoundEnd()
   self.game_state:calculateAllScores()
   print("Round ended!")
   for _, player in ipairs(self.game_state.players) do
-    print("Player " .. player.id .. " score:", self.game_state.scores[player.id])
+    print(
+      "Player " .. player.id .. " score:",
+      self.game_state.scores[player.id]
+    )
   end
   self.game_state.current_state = Constants.STATES.GAME_OVER
 end
@@ -94,20 +94,17 @@ function GameController:discardCard(card)
 end
 
 function GameController:endTurn()
-  -- Check win condition
   local winner = self.game_state:checkWinCondition()
   if winner then
     self.game_state.current_state = Constants.STATES.ROUND_END
     return
   end
 
-  -- Check if deck empty
   if self.game_state:isDeckEmpty() then
     self.game_state.current_state = Constants.STATES.ROUND_END
     return
   end
 
-  -- Next player
   self.game_state:nextPlayer()
 
   local next_player = self.game_state:getCurrentPlayer()
