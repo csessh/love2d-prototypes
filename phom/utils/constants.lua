@@ -8,6 +8,12 @@ Constants.SCREEN_HEIGHT = 720
 Constants.CARD_WIDTH = 71
 Constants.CARD_HEIGHT = 96
 
+-- Deck and discard pile positions
+Constants.DECK_X = 400
+Constants.DECK_Y = 300
+Constants.DISCARD_X = 800
+Constants.DISCARD_Y = 300
+
 -- Card suits
 Constants.SUITS = {"hearts", "diamonds", "clubs", "spades"}
 Constants.SUIT_SYMBOLS = {

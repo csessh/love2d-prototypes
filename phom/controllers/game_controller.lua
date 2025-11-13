@@ -1,6 +1,7 @@
 local Constants = require("utils/constants")
 local GameState = require("models/game_state")
 local AIController = require("controllers/ai_controller")
+local flux = require("libraries/flux")
 
 local GameController = {}
 GameController.__index = GameController
@@ -19,6 +20,7 @@ function GameController.new()
 end
 
 function GameController:update(dt)
+  flux.update(dt)
   self.ai_controller:update(dt)
 
   if self.game_state.current_state == Constants.STATES.MENU then
@@ -116,6 +118,29 @@ function GameController:endTurn()
   else
     self.game_state.current_state = Constants.STATES.AI_TURN
   end
+end
+
+function GameController:startDrawAnimation(card, target_x, target_y)
+  self.animating = true
+  self.animation_card = card
+  self.game_state.turn_substep = Constants.TURN_SUBSTEPS.ANIMATING_DRAW
+
+  card.x = Constants.DECK_X
+  card.y = Constants.DECK_Y
+
+  flux.to(card, 0.3, {x = target_x, y = target_y})
+    :oncomplete(function()
+      self:onDrawAnimationComplete(card)
+    end)
+end
+
+function GameController:onDrawAnimationComplete(card)
+  local player = self.game_state:getCurrentPlayer()
+  player:addCardToHand(card)
+
+  self.game_state.turn_substep = Constants.TURN_SUBSTEPS.DISCARD_PHASE
+  self.animating = false
+  self.animation_card = nil
 end
 
 return GameController

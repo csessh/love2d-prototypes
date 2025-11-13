@@ -127,8 +127,22 @@ function InputController:handleChooseAction(x, y)
   local deck_y = Constants.SCREEN_HEIGHT / 2
 
   if self:isPointInCard(x, y, deck_x, deck_y, CARD_SCALE) and not game_state:isDeckEmpty() then
-    print("Clicked deck - drawing card")
-    self.game_controller:drawCard()
+    print("Clicked deck - drawing card with animation")
+    local card = game_state.deck:draw()
+    if card then
+      card.face_up = true
+
+      local player = game_state:getCurrentPlayer()
+      local hand_size = #player.hand
+      local center_x = Constants.SCREEN_WIDTH / 2
+      local card_spacing = Constants.CARD_WIDTH
+      local total_hand_width = hand_size * card_spacing
+      local start_x = center_x - total_hand_width / 2
+      local target_x = start_x + hand_size * card_spacing
+      local target_y = Constants.SCREEN_HEIGHT - 70
+
+      self.game_controller:startDrawAnimation(card, target_x, target_y)
+    end
     return
   end
 
