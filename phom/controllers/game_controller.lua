@@ -117,12 +117,14 @@ function GameController:endTurn()
     return
   end
 
+  self.game_state:nextPlayer()
+
+  -- Check if deck is empty AFTER moving to next player but BEFORE they draw
+  -- This allows the player who drew the last card to complete their turn
   if self.game_state:isDeckEmpty() then
     self.game_state.current_state = Constants.STATES.ROUND_END
     return
   end
-
-  self.game_state:nextPlayer()
 
   local next_player = self.game_state:getCurrentPlayer()
   if next_player.type == "human" then
