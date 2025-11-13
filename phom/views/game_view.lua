@@ -105,6 +105,8 @@ function GameView:drawBottomPlayer(player)
   for i, card in ipairs(player.hand) do
     local x = start_x + (i - 1) * card_spacing
     local y = center_y + (card.hover_offset_y or 0)
+    card.x = x
+    card.y = y
     card.face_up = player.type == "human"
     self.card_renderer:drawCard(card, x, y, 0, CARD_SCALE)
   end
