@@ -240,6 +240,52 @@ function GameView:drawUI(game_state)
   love.graphics.setColor(1, 1, 1)
   love.graphics.print("Round: " .. game_state.round_number, 10, 10)
   love.graphics.print("State: " .. game_state.current_state, 10, 30)
+
+  -- Draw turn indicator
+  self:drawTurnIndicator(game_state)
+end
+
+function GameView:drawTurnIndicator(game_state)
+  local current_player = game_state:getCurrentPlayer()
+  if not current_player then return end
+
+  -- Draw indicator based on player position
+  love.graphics.setColor(1, 1, 0, 0.8)  -- Yellow with slight transparency
+
+  if current_player.position == Constants.POSITIONS.BOTTOM then
+    -- Arrow pointing down at bottom player
+    local x = Constants.SCREEN_WIDTH / 2
+    local y = Constants.SCREEN_HEIGHT - 200
+    love.graphics.polygon("fill", x, y + 30, x - 15, y, x + 15, y)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print("YOUR TURN", x - 35, y - 25)
+
+  elseif current_player.position == Constants.POSITIONS.LEFT then
+    -- Arrow pointing left
+    local x = 280
+    local y = Constants.SCREEN_HEIGHT / 2
+    love.graphics.polygon("fill", x - 30, y, x, y - 15, x, y + 15)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print("AI TURN", x + 10, y - 10)
+
+  elseif current_player.position == Constants.POSITIONS.TOP then
+    -- Arrow pointing up at top player
+    local x = Constants.SCREEN_WIDTH / 2
+    local y = 220
+    love.graphics.polygon("fill", x, y - 30, x - 15, y, x + 15, y)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print("AI TURN", x - 25, y + 10)
+
+  elseif current_player.position == Constants.POSITIONS.RIGHT then
+    -- Arrow pointing right
+    local x = Constants.SCREEN_WIDTH - 280
+    local y = Constants.SCREEN_HEIGHT / 2
+    love.graphics.polygon("fill", x + 30, y, x, y - 15, x, y + 15)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print("AI TURN", x - 60, y - 10)
+  end
+
+  love.graphics.setColor(1, 1, 1)  -- Reset to white
 end
 
 return GameView

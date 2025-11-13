@@ -10,7 +10,7 @@ function GameState.new()
     deck = Deck.new(),
     discard_pile = {},
     players = {},
-    current_player_index = 1,
+    current_player_index = math.random(1, 4),  -- Random starting player
     current_state = Constants.STATES.MENU,
     turn_substep = nil,
     selected_cards = {},
