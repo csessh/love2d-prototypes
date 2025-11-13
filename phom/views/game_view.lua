@@ -14,13 +14,19 @@ function GameView.new()
   return setmetatable(instance, GameView)
 end
 
-function GameView:draw(game_state)
+function GameView:draw(game_state, game_controller)
   love.graphics.clear(0.1, 0.4, 0.2)
   self:drawDeck(game_state)
   self:drawDiscardPile(game_state)
 
   for _, player in ipairs(game_state.players) do
     self:drawPlayer(player)
+  end
+
+  -- Draw animating card on top of everything
+  if game_controller and game_controller.animating and game_controller.animation_card then
+    local card = game_controller.animation_card
+    self.card_renderer:drawCard(card, card.x, card.y, 0, CARD_SCALE)
   end
 
   self:drawUI(game_state)
