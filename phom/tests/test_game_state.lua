@@ -242,7 +242,9 @@ test("GameState creation initializes with default values", function()
   assert_not_nil(game.deck, "Deck should be initialized")
   assert_equal(#game.discard_pile, 0, "Discard pile should be empty")
   assert_equal(#game.players, 4, "Should have 4 players")
-  assert_equal(game.current_player_index, 1, "Current player index should be 1")
+  -- Current player index is now randomized (1-4), so just check it's valid
+  assert_true(game.current_player_index >= 1 and game.current_player_index <= 4,
+              "Current player index should be between 1 and 4")
   assert_equal(game.current_state, Constants.STATES.MENU, "Initial state should be MENU")
   assert_nil(game.turn_substep, "Turn substep should be nil initially")
   assert_equal(#game.selected_cards, 0, "Selected cards should be empty")
@@ -281,25 +283,26 @@ test("getCurrentPlayer returns the current player", function()
 
   local player = game:getCurrentPlayer()
   assert_not_nil(player, "Should return a player")
-  assert_equal(player.id, 1, "Should return player 1 initially")
+  -- Starting player is now random, just verify it's valid
+  assert_equal(player.id, game.current_player_index, "Should return the current player")
+  assert_true(player.id >= 1 and player.id <= 4, "Player ID should be between 1 and 4")
 end)
 
 test("nextPlayer cycles through all 4 players", function()
   local game = GameState.new()
 
-  assert_equal(game.current_player_index, 1, "Should start at player 1")
+  -- Starting player is random, but nextPlayer should cycle correctly
+  local starting_index = game.current_player_index
 
   game:nextPlayer()
-  assert_equal(game.current_player_index, 2, "Should move to player 2")
+  local expected_next = (starting_index % 4) + 1
+  assert_equal(game.current_player_index, expected_next, "Should move to next player")
 
+  -- Cycle through all 4 players and verify we return to start
   game:nextPlayer()
-  assert_equal(game.current_player_index, 3, "Should move to player 3")
-
   game:nextPlayer()
-  assert_equal(game.current_player_index, 4, "Should move to player 4")
-
   game:nextPlayer()
-  assert_equal(game.current_player_index, 1, "Should cycle back to player 1")
+  assert_equal(game.current_player_index, starting_index, "Should cycle back to starting player after 4 calls")
 end)
 
 test("getTopDiscard returns nil when discard pile is empty", function()
