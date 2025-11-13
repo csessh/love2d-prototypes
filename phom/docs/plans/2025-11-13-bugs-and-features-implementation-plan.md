@@ -10,6 +10,34 @@
 
 ---
 
+## Implementation Progress
+
+**Status:** In Progress (3/27 tasks completed)
+
+### Completed Tasks ✅
+
+- **Task 1: Fix Random Seed Bug** - Commit: `b3c5de3`
+  - Added RNG seeding to `love.load()` (moved from Deck:shuffle() after code review)
+  - Ensures different card sequences each game
+
+- **Task 2: Fix Hover Detection for Overlapping Cards** - Commit: `3977ca9`
+  - Reversed iteration order in hover detection
+  - Rightmost (topmost) card now highlights correctly
+
+- **Task 3: Add Animation Substates to Constants** - Commit: `ce81bef`
+  - Added ANIMATING_DRAW and ANIMATING_DISCARD to TURN_SUBSTEPS
+  - Foundation for animation system
+
+### In Progress 🔄
+
+- **Task 4: Add GameController Animation State** - Started, needs completion
+
+### Pending ⏳
+
+- Tasks 5-27: Animation implementation, visual indicators, end game flow
+
+---
+
 ## Task 1: Fix Random Seed Bug
 
 **Files:**
