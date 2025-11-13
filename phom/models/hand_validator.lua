@@ -1,9 +1,9 @@
 local Constants = require("utils/constants")
 
-local MeldValidator = {}
+local HandValidator = {}
 
 -- Check if cards form a valid set (3+ same rank, any suits)
-function MeldValidator.isValidSet(cards)
+function HandValidator.isValidSet(cards)
   if #cards < 3 then
     return false
   end
@@ -19,7 +19,7 @@ function MeldValidator.isValidSet(cards)
 end
 
 -- Check if cards form a valid sequence (3+ consecutive, same suit)
-function MeldValidator.isValidSequence(cards)
+function HandValidator.isValidSequence(cards)
   if #cards < 3 then
     return false
   end
@@ -49,8 +49,8 @@ function MeldValidator.isValidSequence(cards)
   return true
 end
 
--- Check if hand_cards + discard_card form valid meld
-function MeldValidator.canFormMeld(hand_cards, discard_card)
+-- Check if hand_cards + discard_card form valid hand
+function HandValidator.canFormHand(hand_cards, discard_card)
   if not discard_card or #hand_cards < 2 then
     return false
   end
@@ -60,20 +60,20 @@ function MeldValidator.canFormMeld(hand_cards, discard_card)
     table.insert(all_cards, card)
   end
 
-  return MeldValidator.isValidSet(all_cards) or MeldValidator.isValidSequence(all_cards)
+  return HandValidator.isValidSet(all_cards) or HandValidator.isValidSequence(all_cards)
 end
 
--- Real-time validation for UI (returns meld type or nil)
-function MeldValidator.validateMeldSelection(selected_cards, discard_card)
-  if MeldValidator.canFormMeld(selected_cards, discard_card) then
+-- Real-time validation for UI (returns hand type or nil)
+function HandValidator.validateHandSelection(selected_cards, discard_card)
+  if HandValidator.canFormHand(selected_cards, discard_card) then
     local all_cards = {discard_card}
     for _, card in ipairs(selected_cards) do
       table.insert(all_cards, card)
     end
 
-    if MeldValidator.isValidSet(all_cards) then
+    if HandValidator.isValidSet(all_cards) then
       return "set"
-    elseif MeldValidator.isValidSequence(all_cards) then
+    elseif HandValidator.isValidSequence(all_cards) then
       return "sequence"
     end
   end
@@ -81,4 +81,4 @@ function MeldValidator.validateMeldSelection(selected_cards, discard_card)
   return nil
 end
 
-return MeldValidator
+return HandValidator
