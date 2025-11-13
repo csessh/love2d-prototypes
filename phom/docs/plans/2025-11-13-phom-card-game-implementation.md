@@ -1760,6 +1760,85 @@ Add simple AI that draws and discards highest-value cards"
 
 ---
 
+## Session Progress Update - 2025-11-13
+
+### Animation System Implementation (Completed)
+
+**Tasks 1-13** from the original plan were completed in previous sessions. This session focused on implementing and debugging the animation system.
+
+#### Completed Work:
+
+**1. Card Draw/Discard Animation System**
+- Implemented flux-based animation for card drawing from deck to player hands
+- Implemented discard animation from hand to discard pile
+- Added rotation animation for AI players (LEFT/RIGHT players rotate 90°)
+- Cards animate smoothly with proper easing
+
+**2. Animation State Management**
+- Added `animating` flag and `animation_card` to GameController
+- Created `ANIMATING_DRAW` and `ANIMATING_DISCARD` turn substeps
+- Implemented animation completion callbacks
+- Added proper state cleanup after animations
+
+**3. Input Blocking During Animations**
+- Block mouse input during active animations (both flag and substep checks)
+- Block hover effects during animations
+- Prevents race conditions and double-clicks
+
+**4. Unified Draw/Discard Code Paths**
+- Refactored so both human and AI players use same `GameController:drawCard()` and `discardCard()` methods
+- Draw logic uses `getCurrentPlayer()` for consistency
+- InputController delegates to GameController instead of duplicating logic
+
+**5. AI Animation Timing Fix**
+- AI now waits for draw animation to complete before discarding
+- Added `waiting_for_animation` state to AIController
+- AI chooses discard card AFTER draw completes (considers full hand)
+- Proper turn flow: draw → animate → discard → animate → end turn
+
+**6. Bug Fixes**
+- Fixed: Cards staying face-down on discard pile (now flip to face_up)
+- Fixed: Human player draw animation failing on subsequent turns (position calculation mismatch)
+- Fixed: Card properties not being reset (hover_offset_y cleared on animation start)
+- Fixed: Position calculations now match between GameView and animation targets
+
+**7. All Player Positions Supported**
+- BOTTOM (human): Cards at bottom, no rotation
+- LEFT (AI): Cards on left side, 90° rotation
+- TOP (AI): Cards at top, no rotation
+- RIGHT (AI): Cards on right side, 90° rotation
+
+#### Key Architecture Decisions:
+
+1. **Single Source of Truth**: `GameController:drawCard()` handles all players via `getCurrentPlayer()`
+2. **Animation-Driven State**: Turn substeps change when animations complete, not when they start
+3. **Defensive State Checks**: Input blocking checks both `animating` flag AND turn substeps
+4. **Consistent Positioning**: `calculateCardTargetPosition()` matches GameView rendering logic exactly
+
+#### Files Modified:
+- `phom/controllers/game_controller.lua`: Animation system, unified draw/discard
+- `phom/controllers/input_controller.lua`: Input blocking, simplified deck click handling
+- `phom/controllers/ai_controller.lua`: Animation-aware AI timing
+- `phom/views/game_view.lua`: Store card positions/rotation for animations, render animation_card
+- `phom/utils/constants.lua`: Accurate DECK_X/Y, DISCARD_X/Y positions
+
+#### Commits:
+- `7439be1`: Add animation state tracking fields
+- `2311175`: Implement draw animation
+- `e175bf5`: Block input during animations
+- `7d5b000`, `93fa99b`: Fix animation card rendering
+- `aa1db79`: Implement discard animation
+- `f33271c`: Store card positions for accurate animations
+- `a0abfbd`: Fix deck/discard position constants
+- `1f49538`: Fix card teleporting (remove from hand before animating)
+- `e235997`: Add AI player animations with rotation
+- `e4c2ecf`: Ensure discarded cards are face-up
+- `4a3f8af`: Clear card properties at animation start
+- `0938bcd`: Fix human player draw animation position calculation
+- `950c94d`: Unify draw/discard flow and fix AI animation timing
+
+---
+
 ## Remaining Tasks Summary
 
 The following tasks complete the implementation:
@@ -1767,7 +1846,7 @@ The following tasks complete the implementation:
 - **Task 14**: Card selection for meld formation (UI interaction)
 - **Task 15**: Meld validation and formation logic
 - **Task 16**: Advanced AI behavior tree
-- **Task 17**: Animation system with flux
+- **Task 17**: ~~Animation system with flux~~ ✅ **COMPLETED**
 - **Task 18**: Card sprite integration (replace placeholders)
 - **Task 19**: UI polish (buttons, highlights, feedback)
 - **Task 20**: Round end screen and scoring display
