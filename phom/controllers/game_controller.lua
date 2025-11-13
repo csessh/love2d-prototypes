@@ -10,6 +10,8 @@ function GameController.new()
     game_state = GameState.new(),
     animation_queue = {},
     ai_controller = nil,
+    animating = false,
+    animation_card = nil,
   }
   setmetatable(instance, GameController)
   instance.ai_controller = AIController.new(instance)
