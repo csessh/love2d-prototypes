@@ -65,8 +65,10 @@ function InputController:updateHover()
   local start_x = center_x - total_width / 2
 
   -- Find which card (if any) is being hovered
+  -- Check cards in REVERSE order (rightmost/topmost first)
   local new_hovered_index = nil
-  for i, card in ipairs(player.hand) do
+  for i = #player.hand, 1, -1 do
+    local card = player.hand[i]
     local x = start_x + (i - 1) * card_spacing
     local y = center_y + (card.hover_offset_y or 0)
 
