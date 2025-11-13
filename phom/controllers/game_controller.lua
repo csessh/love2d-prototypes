@@ -1,5 +1,6 @@
 local Constants = require("utils/constants")
 local GameState = require("models/game_state")
+local AIController = require("controllers/ai_controller")
 
 local GameController = {}
 GameController.__index = GameController
@@ -7,12 +8,18 @@ GameController.__index = GameController
 function GameController.new()
   local instance = {
     game_state = GameState.new(),
-    animation_queue = {}
+    animation_queue = {},
+    ai_controller = nil  -- Will be set after creation
   }
-  return setmetatable(instance, GameController)
+  setmetatable(instance, GameController)
+  instance.ai_controller = AIController.new(instance)
+  return instance
 end
 
 function GameController:update(dt)
+  -- Update AI
+  self.ai_controller:update(dt)
+
   -- Handle state machine
   if self.game_state.current_state == Constants.STATES.MENU then
     self:handleMenu()
@@ -20,8 +27,6 @@ function GameController:update(dt)
     self:handleDealing()
   elseif self.game_state.current_state == Constants.STATES.PLAYER_TURN then
     self:handlePlayerTurn()
-  elseif self.game_state.current_state == Constants.STATES.AI_TURN then
-    self:handleAITurn()
   elseif self.game_state.current_state == Constants.STATES.ROUND_END then
     self:handleRoundEnd()
   elseif self.game_state.current_state == Constants.STATES.GAME_OVER then
@@ -57,11 +62,6 @@ end
 function GameController:handlePlayerTurn()
   -- Input handled by InputController
   -- Just manage substeps here
-end
-
-function GameController:handleAITurn()
-  -- AI logic will be handled by AIController in Task 13
-  -- For now, this is empty as per task instructions
 end
 
 function GameController:handleRoundEnd()
