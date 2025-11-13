@@ -218,6 +218,9 @@ function GameController:startDiscardAnimation(card)
   local player = self.game_state:getCurrentPlayer()
   player:removeCardFromHand(card)
 
+  -- Flip card face up for discard pile
+  card.face_up = true
+
   -- Card position should already be set by GameView
   -- Start animation from current position to discard pile
   -- Rotation animates to 0 for AI players, stays at 0 for human players
