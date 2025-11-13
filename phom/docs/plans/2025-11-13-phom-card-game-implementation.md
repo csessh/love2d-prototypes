@@ -2329,6 +2329,227 @@ Add simple AI that draws and discards highest-value cards"
 
 ---
 
+### Task 17: Player Meld Area and Individual Discard Piles
+
+**Goal:** Add visual areas for each player to display their melds and discard piles with cards spread horizontally
+
+**Current Behavior:**
+- Players have a `meld_area_cards` field but it's not prominently displayed
+- All discarded cards go to a single central discard pile
+- Melds are formed but not visually represented
+- No clear visual distinction between a player's melds and their discards
+
+**Required Behavior:**
+- Each player has two dedicated visual areas:
+  1. **Meld Area**: Shows cards that are part of completed melds (sets/sequences)
+  2. **Player Discard Pile**: Shows cards this player has discarded
+- Cards in both areas are **spread horizontally** (not stacked)
+- Cards are face-up and clearly visible
+- Areas should be positioned near each player's hand
+- Clear visual separation between meld area and discard pile
+
+**Design Considerations:**
+
+**Layout for BOTTOM Player (Human):**
+- Hand: Bottom center (existing)
+- Meld Area: Bottom left area, cards spread horizontally
+- Discard Pile: Bottom right area, cards spread horizontally
+- Label each area for clarity
+
+**Layout for LEFT Player (AI):**
+- Hand: Left side, vertical (existing)
+- Meld Area: Below hand, cards spread horizontally
+- Discard Pile: Below meld area, cards spread horizontally
+
+**Layout for TOP Player (AI):**
+- Hand: Top center (existing)
+- Meld Area: Below hand, cards spread horizontally
+- Discard Pile: Below meld area, cards spread horizontally
+
+**Layout for RIGHT Player (AI):**
+- Hand: Right side, vertical (existing)
+- Meld Area: Below hand, cards spread horizontally
+- Discard Pile: Below meld area, cards spread horizontally
+
+**Implementation Steps:**
+
+1. **Update Player Model to Track Individual Discards**
+   ```lua
+   -- In models/player.lua
+   function Player.new(id, player_type, position)
+     local instance = {
+       id = id,
+       type = player_type,
+       position = position,
+       hand = {},
+       melds = {},  -- {type="set"|"sequence", cards={}}
+       meld_area_cards = {},  -- All cards in melds (flattened)
+       discard_pile = {},  -- NEW: This player's discarded cards
+       score = 0
+     }
+     return setmetatable(instance, Player)
+   end
+
+   function Player:discardCard(card)
+     self:removeCardFromHand(card)
+     table.insert(self.discard_pile, card)
+   end
+   ```
+
+2. **Modify GameController to Use Player Discard Piles**
+   ```lua
+   -- In controllers/game_controller.lua
+   function GameController:discardCard(card)
+     local current_player = self.game_state:getCurrentPlayer()
+     if current_player:removeCardFromHand(card) then
+       -- Add to player's personal discard pile instead of central pile
+       table.insert(current_player.discard_pile, card)
+       -- Also add to central discard for game logic compatibility
+       self.game_state:addToDiscard(card)
+       self:endTurn()
+     end
+   end
+   ```
+
+3. **Update GameView to Draw Meld and Discard Areas**
+   ```lua
+   -- In views/game_view.lua
+   function GameView:drawBottomPlayer(player)
+     local center_x = Constants.SCREEN_WIDTH / 2
+     local center_y = Constants.SCREEN_HEIGHT - 70
+
+     -- Draw hand (existing code)
+     -- ...
+
+     -- Draw meld area (left side)
+     local meld_x = 100
+     local meld_y = Constants.SCREEN_HEIGHT - 150
+     love.graphics.setColor(0.7, 0.7, 0.7)
+     love.graphics.print("Melds", meld_x, meld_y - 20)
+     love.graphics.setColor(1, 1, 1)
+
+     local card_spacing = Constants.CARD_WIDTH * CARD_SCALE * 0.6  -- Cards closer together
+     for i, card in ipairs(player.meld_area_cards) do
+       self.card_renderer:drawCard(
+         card,
+         meld_x + (i - 1) * card_spacing,
+         meld_y,
+         0,
+         CARD_SCALE * 0.8  -- Slightly smaller
+       )
+     end
+
+     -- Draw player discard pile (right side)
+     local discard_x = Constants.SCREEN_WIDTH - 300
+     local discard_y = Constants.SCREEN_HEIGHT - 150
+     love.graphics.setColor(0.7, 0.7, 0.7)
+     love.graphics.print("Your Discards", discard_x, discard_y - 20)
+     love.graphics.setColor(1, 1, 1)
+
+     for i, card in ipairs(player.discard_pile) do
+       self.card_renderer:drawCard(
+         card,
+         discard_x + (i - 1) * card_spacing,
+         discard_y,
+         0,
+         CARD_SCALE * 0.8
+       )
+     end
+   end
+
+   function GameView:drawLeftPlayer(player)
+     local x = 150
+     local center_y = Constants.SCREEN_HEIGHT / 2
+
+     -- Draw hand (existing code)
+     -- ...
+
+     -- Draw meld area (horizontal spread below hand)
+     local meld_x = x
+     local meld_y = center_y + 150
+     love.graphics.setColor(0.7, 0.7, 0.7)
+     love.graphics.print("AI Melds", meld_x - 30, meld_y - 20)
+     love.graphics.setColor(1, 1, 1)
+
+     local card_spacing = Constants.CARD_HEIGHT * 0.6  -- For rotated cards
+     for i, card in ipairs(player.meld_area_cards) do
+       self.card_renderer:drawCard(
+         card,
+         meld_x + (i - 1) * card_spacing,
+         meld_y,
+         0,  -- No rotation for meld area
+         CARD_SCALE * 0.6
+       )
+     end
+
+     -- Draw player discard pile (horizontal spread below melds)
+     local discard_x = x
+     local discard_y = meld_y + 100
+     love.graphics.setColor(0.7, 0.7, 0.7)
+     love.graphics.print("AI Discards", discard_x - 30, discard_y - 20)
+     love.graphics.setColor(1, 1, 1)
+
+     for i, card in ipairs(player.discard_pile) do
+       self.card_renderer:drawCard(
+         card,
+         discard_x + (i - 1) * card_spacing,
+         discard_y,
+         0,
+         CARD_SCALE * 0.6
+       )
+     end
+   end
+
+   -- Similar updates for drawTopPlayer() and drawRightPlayer()
+   ```
+
+4. **Update Constants for Layout**
+   ```lua
+   -- In utils/constants.lua
+   -- Add positioning constants for meld/discard areas
+   Constants.MELD_AREA_SCALE = 0.8
+   Constants.DISCARD_AREA_SCALE = 0.8
+   Constants.MELD_CARD_SPACING_FACTOR = 0.6  -- Cards overlap slightly
+   ```
+
+5. **Optional: Visual Enhancements**
+   - Draw subtle background rectangles behind meld/discard areas
+   - Add borders or dividers between areas
+   - Highlight cards in melds with slight glow or outline
+   - Display card count labels (e.g., "Melds: 6 cards")
+
+**Challenges:**
+- Need to balance screen space between hand, melds, and discards
+- Must ensure meld area scales properly as more melds are formed
+- AI player layouts are more constrained (side positions)
+- Cards must remain readable at smaller scales
+- May need to adjust existing hand positions to make room
+
+**Testing:**
+- Form multiple melds and verify they display correctly
+- Discard several cards and verify discard pile spreads horizontally
+- Test with maximum cards (e.g., 9 melds = 27+ cards)
+- Verify all 4 player positions render correctly
+- Check that smaller card scales are still readable
+
+**Visual Mockup (BOTTOM player):**
+```
+[Melds Area]                  [Hand Area (center)]           [Discard Pile]
+[A♥][2♥][3♥]                  [Cards in arc/row]             [5♠][K♦][7♣]
+```
+
+**Files to Modify:**
+- `phom/models/player.lua`: Add `discard_pile` field and `discardCard()` method
+- `phom/controllers/game_controller.lua`: Update `discardCard()` to use player discard pile
+- `phom/views/game_view.lua`: Add rendering for meld area and discard pile for all 4 player positions
+- `phom/utils/constants.lua`: Add layout constants for meld/discard areas
+
+**Dependencies:**
+- Should be implemented before Task 18 (meld formation logic) so melds have a place to be displayed
+- Works independently of Tasks 14-16
+
+---
+
 ## Remaining Tasks Summary
 
 The following tasks complete the implementation:
@@ -2336,12 +2557,13 @@ The following tasks complete the implementation:
 - **Task 14**: Animated Dealing Phase (detailed above)
 - **Task 15**: Card Drag-and-Drop Reordering (detailed above)
 - **Task 16**: Keyboard Shortcuts - ESC & R (detailed above)
-- **Task 17**: ~~Animation system with flux~~ ✅ **COMPLETED**
-- **Task 18**: Meld validation and formation logic
-- **Task 19**: Advanced AI behavior tree
-- **Task 20**: Card sprite integration (replace placeholders)
-- **Task 21**: UI polish (buttons, highlights, feedback)
-- **Task 22**: Round end screen and scoring display
-- **Task 23**: Testing and bug fixes
+- **Task 17**: Player Meld Area and Individual Discard Piles (detailed above)
+- **Task 18**: ~~Animation system with flux~~ ✅ **COMPLETED** (now renumbered)
+- **Task 19**: Meld validation and formation logic
+- **Task 20**: Advanced AI behavior tree
+- **Task 21**: Card sprite integration (replace placeholders)
+- **Task 22**: UI polish (buttons, highlights, feedback)
+- **Task 23**: Round end screen and scoring display
+- **Task 24**: Testing and bug fixes
 
 Would you like me to continue with the detailed steps for these remaining tasks?
