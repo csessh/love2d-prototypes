@@ -1882,11 +1882,177 @@ Add simple AI that draws and discards highest-value cards"
 
 ---
 
+## Planned Tasks (Not Yet Implemented)
+
+### Task 14: Animated Dealing Phase
+
+**Goal:** Replace instant card dealing with animated card-by-card dealing
+
+**Current Behavior:**
+- All 9 cards are instantly added to each player's hand
+- No visual feedback during dealing
+- Game jumps directly to first player's turn
+
+**Required Behavior:**
+- Deal cards one at a time in round-robin fashion
+- Start with the randomly selected starting player
+- Each player receives 1 card, then cycle to next player
+- Repeat for 9 rounds (each player gets 9 cards total)
+- Cards animate from deck to each player's hand position
+- After all 36 cards are dealt, place 1 card face-up on discard pile
+- Then start first player's turn
+
+**Implementation Steps:**
+
+1. **Add Dealing State Tracking to GameController**
+   - `dealing_in_progress = false`
+   - `dealing_card_index = 0` (tracks which card we're dealing, 0-35)
+   - `dealing_timer = 0` (time delay between cards)
+   - `dealing_delay = 0.15` (seconds between each card deal)
+
+2. **Modify handleDealing() to Start Animated Dealing**
+   ```lua
+   function GameController:handleDealing()
+     -- Reset dealing state
+     self.dealing_in_progress = true
+     self.dealing_card_index = 0
+     self.dealing_timer = 0
+     -- Don't deal instantly, will be handled in update()
+   end
+   ```
+
+3. **Add Dealing Logic to update()**
+   ```lua
+   function GameController:update(dt)
+     flux.update(dt)
+     self.ai_controller:update(dt)
+
+     -- Handle animated dealing
+     if self.game_state.current_state == Constants.STATES.DEALING and self.dealing_in_progress then
+       if not self.animating then  -- Only deal next card when previous animation completes
+         self.dealing_timer = self.dealing_timer + dt
+         if self.dealing_timer >= self.dealing_delay then
+           self:dealNextCard()
+           self.dealing_timer = 0
+         end
+       end
+     end
+
+     -- ... rest of state machine
+   end
+   ```
+
+4. **Create dealNextCard() Method**
+   ```lua
+   function GameController:dealNextCard()
+     -- Calculate which player should receive this card
+     local round = math.floor(self.dealing_card_index / 4)  -- Which round (0-8)
+     local player_offset = self.dealing_card_index % 4  -- Which player in this round (0-3)
+     local player_index = ((self.game_state.current_player_index - 1 + player_offset) % 4) + 1
+     local player = self.game_state.players[player_index]
+
+     -- Draw card from deck
+     local card = self.game_state.deck:draw()
+     if not card then
+       self:finishDealing()
+       return
+     end
+
+     -- Set face_up based on player type
+     card.face_up = (player.type == "human")
+
+     -- Calculate target position for this player
+     local target_x, target_y, rotation = self:calculateCardTargetPosition(player)
+
+     -- Adjust target for card position in hand (cards should stack in order)
+     local hand_size = #player.hand
+     -- ... adjust target_x based on hand_size
+
+     -- Start animation
+     self:startDrawAnimation(card, target_x, target_y, rotation)
+
+     self.dealing_card_index = self.dealing_card_index + 1
+
+     -- Check if dealing is complete (36 cards dealt)
+     if self.dealing_card_index >= 36 then
+       -- Will finish after last animation completes
+     end
+   end
+   ```
+
+5. **Modify onDrawAnimationComplete() to Handle Dealing**
+   ```lua
+   function GameController:onDrawAnimationComplete(card)
+     local player = self.game_state:getCurrentPlayer()
+
+     -- During dealing, add card to appropriate player (might not be current player)
+     if self.game_state.current_state == Constants.STATES.DEALING then
+       -- Card goes to the player we calculated in dealNextCard
+       -- Need to track which player this card belongs to
+       -- Could store player reference on card: card.target_player
+       card.target_player:addCardToHand(card)
+
+       -- Check if dealing is complete
+       if self.dealing_card_index >= 36 and not self.animating then
+         self:finishDealing()
+       end
+     else
+       -- Normal draw during gameplay
+       player:addCardToHand(card)
+       self.game_state.turn_substep = Constants.TURN_SUBSTEPS.DISCARD_PHASE
+     end
+
+     self.animating = false
+     self.animation_card = nil
+   end
+   ```
+
+6. **Create finishDealing() Method**
+   ```lua
+   function GameController:finishDealing()
+     self.dealing_in_progress = false
+
+     -- Place first discard card
+     local first_discard = self.game_state.deck:draw()
+     if first_discard then
+       first_discard.face_up = true
+       self.game_state:addToDiscard(first_discard)
+     end
+
+     -- Set initial state based on starting player
+     local starting_player = self.game_state:getCurrentPlayer()
+     if starting_player.type == "human" then
+       self.game_state.current_state = Constants.STATES.PLAYER_TURN
+       self.game_state.turn_substep = Constants.TURN_SUBSTEPS.CHOOSE_ACTION
+     else
+       self.game_state.current_state = Constants.STATES.AI_TURN
+     end
+   end
+   ```
+
+**Challenges:**
+- Need to track which player receives each card during animation
+- Position calculations must account for growing hand size during dealing
+- Animation must complete before dealing next card
+- Must handle transition from dealing to first turn smoothly
+
+**Testing:**
+- Verify cards are dealt in correct round-robin order starting from random player
+- Confirm each player receives exactly 9 cards
+- Check animations play at proper speed (not too fast/slow)
+- Ensure no race conditions during rapid dealing
+
+**Files to Modify:**
+- `phom/controllers/game_controller.lua`: Add dealing state, dealNextCard(), finishDealing()
+- `phom/models/game_state.lua`: May need to remove instant dealCards() method or mark as deprecated
+
+---
+
 ## Remaining Tasks Summary
 
 The following tasks complete the implementation:
 
-- **Task 14**: Card selection for meld formation (UI interaction)
+- **Task 14**: ~~Card selection for meld formation (UI interaction)~~ → **Replaced with Animated Dealing Phase (above)**
 - **Task 15**: Meld validation and formation logic
 - **Task 16**: Advanced AI behavior tree
 - **Task 17**: ~~Animation system with flux~~ ✅ **COMPLETED**
