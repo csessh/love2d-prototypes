@@ -189,9 +189,11 @@ function GameController:startDrawAnimation(card, target_x, target_y, rotation)
   self.animation_card = card
   self.game_state.turn_substep = Constants.TURN_SUBSTEPS.ANIMATING_DRAW
 
+  -- Initialize card position and rotation for animation start
   card.x = Constants.DECK_X
   card.y = Constants.DECK_Y
   card.rotation = 0
+  card.hover_offset_y = 0  -- Clear any hover offset
 
   rotation = rotation or 0
 
