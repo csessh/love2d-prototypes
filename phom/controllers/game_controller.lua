@@ -148,9 +148,12 @@ function GameController:startDiscardAnimation(card)
   self.animation_card = card
   self.game_state.turn_substep = Constants.TURN_SUBSTEPS.ANIMATING_DISCARD
 
-  local start_x = card.x
-  local start_y = card.y
+  -- Remove card from hand immediately so it's not drawn in hand during animation
+  local player = self.game_state:getCurrentPlayer()
+  player:removeCardFromHand(card)
 
+  -- Card position should already be set by GameView
+  -- Start animation from current position to discard pile
   flux.to(card, 0.25, {x = Constants.DISCARD_X, y = Constants.DISCARD_Y})
     :oncomplete(function()
       self:onDiscardAnimationComplete(card)
@@ -158,14 +161,13 @@ function GameController:startDiscardAnimation(card)
 end
 
 function GameController:onDiscardAnimationComplete(card)
-  local player = self.game_state:getCurrentPlayer()
-
-  player:removeCardFromHand(card)
-
+  -- Add to discard pile
   self.game_state:addToDiscard(card)
 
+  -- End turn
   self:endTurn()
 
+  -- Clear animation state
   self.animating = false
   self.animation_card = nil
 end
