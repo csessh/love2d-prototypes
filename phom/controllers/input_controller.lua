@@ -102,6 +102,7 @@ function InputController:updateHover()
 
   -- Use LayoutCalculator for positions
   local positions = LayoutCalculator.calculateHandPositions(player, CARD_SCALE)
+  local card_render_state = self.game_controller.card_render_state
 
   -- Find which card (if any) is being hovered
   -- Check cards in REVERSE order (rightmost/topmost first)
@@ -110,7 +111,8 @@ function InputController:updateHover()
     local card = player.hand[i]
     local pos = positions[card.id]
     if pos then
-      local y = pos.y + (card.hover_offset_y or 0)
+      local render_state = card_render_state:getState(card.id)
+      local y = pos.y + (render_state.hover_offset_y or 0)
 
       if LayoutCalculator.isPointInCard(self.mouse_x, self.mouse_y, pos.x, y, CARD_SCALE) then
         new_hovered_index = i
@@ -124,9 +126,11 @@ function InputController:updateHover()
     -- Clear previous hover
     if self.hovered_card_index then
       local prev_card = player.hand[self.hovered_card_index]
-      if prev_card and prev_card.hover_offset_y then
-        -- Animate back down
-        Flux.to(prev_card, 0.1, { hover_offset_y = 0 })
+      if prev_card then
+        local prev_render_state = card_render_state:getState(prev_card.id)
+        if prev_render_state.hover_offset_y then
+          Flux.to(prev_render_state, 0.1, { hover_offset_y = 0 })
+        end
       end
     end
 
@@ -134,12 +138,12 @@ function InputController:updateHover()
     self.hovered_card_index = new_hovered_index
     if new_hovered_index then
       local card = player.hand[new_hovered_index]
-      if not card.hover_offset_y then
-        card.hover_offset_y = 0
+      local render_state = card_render_state:getState(card.id)
+      if not render_state.hover_offset_y then
+        render_state.hover_offset_y = 0
       end
-      -- Animate up by 15% of card height
       local hover_offset = -(Constants.CARD_HEIGHT * CARD_SCALE * 0.15)
-      Flux.to(card, 0.1, { hover_offset_y = hover_offset })
+      Flux.to(render_state, 0.1, { hover_offset_y = hover_offset })
     end
   end
 end
@@ -150,8 +154,9 @@ function InputController:clearHover()
     local player = game_state:getCurrentPlayer()
     if player and player.hand[self.hovered_card_index] then
       local card = player.hand[self.hovered_card_index]
-      if card.hover_offset_y then
-        Flux.to(card, 0.1, { hover_offset_y = 0 })
+      local render_state = self.game_controller.card_render_state:getState(card.id)
+      if render_state.hover_offset_y then
+        Flux.to(render_state, 0.1, { hover_offset_y = 0 })
       end
     end
     self.hovered_card_index = nil
@@ -179,13 +184,15 @@ function InputController:handleDiscardPhase(x, y)
 
   -- Use LayoutCalculator for positions
   local positions = LayoutCalculator.calculateHandPositions(player, CARD_SCALE)
+  local card_render_state = self.game_controller.card_render_state
 
   -- Check cards in REVERSE order (rightmost/topmost first)
   for i = #player.hand, 1, -1 do
     local card = player.hand[i]
     local pos = positions[card.id]
     if pos then
-      local card_y = pos.y + (card.hover_offset_y or 0)
+      local render_state = card_render_state:getState(card.id)
+      local card_y = pos.y + (render_state.hover_offset_y or 0)
 
       if LayoutCalculator.isPointInCard(x, y, pos.x, card_y, CARD_SCALE) then
         print("Discarding card with animation:", card)

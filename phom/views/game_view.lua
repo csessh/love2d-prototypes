@@ -20,15 +20,17 @@ function GameView:draw(game_state, game_controller)
   self:drawDeck(game_state)
   self:drawDiscardPile(game_state)
 
+  local card_render_state = game_controller.card_render_state
+
   for _, player in ipairs(game_state.players) do
-    self:drawPlayer(player)
+    self:drawPlayer(player, card_render_state)
   end
 
   -- Draw animating card on top of everything
   if game_controller and game_controller.animating and game_controller.animation_card then
     local card = game_controller.animation_card
-    local rotation = card.rotation or 0
-    self.card_renderer:drawCard(card, card.x, card.y, rotation, CARD_SCALE)
+    local render_state = card_render_state:getState(card.id)
+    self.card_renderer:drawCard(card, render_state.x, render_state.y, render_state.rotation, CARD_SCALE)
   end
 
   self:drawUI(game_state)
@@ -83,33 +85,34 @@ function GameView:drawDiscardPile(game_state)
   love.graphics.print("Discard", discard_x - 30, discard_y + 110)
 end
 
-function GameView:drawPlayer(player)
+function GameView:drawPlayer(player, card_render_state)
   if player.position == Constants.POSITIONS.BOTTOM then
-    self:drawBottomPlayer(player)
+    self:drawBottomPlayer(player, card_render_state)
   elseif player.position == Constants.POSITIONS.LEFT then
-    self:drawLeftPlayer(player)
+    self:drawLeftPlayer(player, card_render_state)
   elseif player.position == Constants.POSITIONS.TOP then
-    self:drawTopPlayer(player)
+    self:drawTopPlayer(player, card_render_state)
   elseif player.position == Constants.POSITIONS.RIGHT then
-    self:drawRightPlayer(player)
+    self:drawRightPlayer(player, card_render_state)
   end
 end
 
-function GameView:drawBottomPlayer(player)
+function GameView:drawBottomPlayer(player, card_render_state)
   local positions = LayoutCalculator.calculateHandPositions(player, CARD_SCALE)
 
   for i, card in ipairs(player.hand) do
     local pos = positions[card.id]
     if pos then
-      local x = pos.x
-      local y = pos.y + (card.hover_offset_y or 0)
+      local render_state = card_render_state:getState(card.id)
 
-      -- Store position on card for animation system (temporary, will fix in Task 2)
-      card.x = x
-      card.y = y
+      -- Update render state (not card properties!)
+      render_state.x = pos.x
+      render_state.y = pos.y
+      render_state.face_up = (player.type == "human")
 
-      card.face_up = player.type == "human"
-      self.card_renderer:drawCard(card, x, y, 0, CARD_SCALE)
+      local y = pos.y + (render_state.hover_offset_y or 0)
+
+      self.card_renderer:drawCard(card, pos.x, y, 0, CARD_SCALE)
     end
   end
 
@@ -127,18 +130,20 @@ function GameView:drawBottomPlayer(player)
   end
 end
 
-function GameView:drawLeftPlayer(player)
+function GameView:drawLeftPlayer(player, card_render_state)
   local positions = LayoutCalculator.calculateHandPositions(player, CARD_SCALE)
 
   for i, card in ipairs(player.hand) do
     local pos = positions[card.id]
     if pos then
-      -- Store position on card for animation system (temporary, will fix in Task 2)
-      card.x = pos.x
-      card.y = pos.y
-      card.rotation = pos.rotation
+      local render_state = card_render_state:getState(card.id)
 
-      card.face_up = false
+      -- Update render state (not card properties!)
+      render_state.x = pos.x
+      render_state.y = pos.y
+      render_state.rotation = pos.rotation
+      render_state.face_up = false
+
       self.card_renderer:drawCard(card, pos.x, pos.y, pos.rotation, CARD_SCALE)
     end
   end
@@ -156,18 +161,20 @@ function GameView:drawLeftPlayer(player)
   end
 end
 
-function GameView:drawTopPlayer(player)
+function GameView:drawTopPlayer(player, card_render_state)
   local positions = LayoutCalculator.calculateHandPositions(player, CARD_SCALE)
 
   for i, card in ipairs(player.hand) do
     local pos = positions[card.id]
     if pos then
-      -- Store position on card for animation system (temporary, will fix in Task 2)
-      card.x = pos.x
-      card.y = pos.y
-      card.rotation = pos.rotation
+      local render_state = card_render_state:getState(card.id)
 
-      card.face_up = false
+      -- Update render state (not card properties!)
+      render_state.x = pos.x
+      render_state.y = pos.y
+      render_state.rotation = pos.rotation
+      render_state.face_up = false
+
       self.card_renderer:drawCard(card, pos.x, pos.y, pos.rotation, CARD_SCALE)
     end
   end
@@ -186,18 +193,20 @@ function GameView:drawTopPlayer(player)
   end
 end
 
-function GameView:drawRightPlayer(player)
+function GameView:drawRightPlayer(player, card_render_state)
   local positions = LayoutCalculator.calculateHandPositions(player, CARD_SCALE)
 
   for i, card in ipairs(player.hand) do
     local pos = positions[card.id]
     if pos then
-      -- Store position on card for animation system (temporary, will fix in Task 2)
-      card.x = pos.x
-      card.y = pos.y
-      card.rotation = pos.rotation
+      local render_state = card_render_state:getState(card.id)
 
-      card.face_up = false
+      -- Update render state (not card properties!)
+      render_state.x = pos.x
+      render_state.y = pos.y
+      render_state.rotation = pos.rotation
+      render_state.face_up = false
+
       self.card_renderer:drawCard(card, pos.x, pos.y, pos.rotation, CARD_SCALE)
     end
   end

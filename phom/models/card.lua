@@ -8,11 +8,6 @@ function Card.new(suit, rank)
     suit = suit,
     rank = rank,
     id = suit .. "_" .. rank,
-    x = 0,
-    y = 0,
-    rotation = 0,
-    scale = 1,
-    face_up = true,
   }
   return setmetatable(instance, Card)
 end

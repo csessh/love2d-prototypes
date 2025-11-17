@@ -3,6 +3,7 @@ local Constants = require("utils/constants")
 local Flux = require("libraries/flux")
 local GameState = require("models/game_state")
 local LayoutCalculator = require("utils/layout_calculator")
+local CardRenderState = require("views/card_render_state")
 
 local GameController = {}
 GameController.__index = GameController
@@ -14,6 +15,7 @@ function GameController.new()
     ai_controller = nil,
     animating = false,
     animation_card = nil,
+    card_render_state = CardRenderState.new(),
   }
   setmetatable(instance, GameController)
   instance.ai_controller = AIController.new(instance)
@@ -157,15 +159,18 @@ function GameController:startDrawAnimation(card, target_x, target_y, rotation)
   self.animation_card = card
   self.game_state.turn_substep = Constants.TURN_SUBSTEPS.ANIMATING_DRAW
 
-  -- Initialize card position and rotation for animation start
-  card.x = Constants.DECK_X
-  card.y = Constants.DECK_Y
-  card.rotation = 0
-  card.hover_offset_y = 0 -- Clear any hover offset
+  -- Use CardRenderState instead of card properties
+  local render_state = self.card_render_state:getState(card.id)
+  render_state.x = Constants.DECK_X
+  render_state.y = Constants.DECK_Y
+  render_state.rotation = 0
+  render_state.hover_offset_y = 0
+  render_state.face_up = (self.game_state:getCurrentPlayer().type == "human")
 
   rotation = rotation or 0
 
-  Flux.to(card, 0.3, { x = target_x, y = target_y, rotation = rotation })
+  -- Animate the render state, not the card
+  Flux.to(render_state, 0.3, { x = target_x, y = target_y, rotation = rotation })
     :oncomplete(function()
       print("=== DRAW ANIMATION COMPLETE ===")
       self:onDrawAnimationComplete(card)
@@ -188,18 +193,16 @@ function GameController:startDiscardAnimation(card)
 
   local player = self.game_state:getCurrentPlayer()
   player:removeCardFromHand(card)
-  card.face_up = true
 
-  -- Card position should already be set by GameView
-  -- Start animation from current position to discard pile
-  -- Rotation animates to 0 for AI players, stays at 0 for human players
-  Flux.to(card, 0.25, {
-    x = Constants.DISCARD_X,
-    y = Constants.DISCARD_Y,
-    rotation = 0,
-  }):oncomplete(function()
-    self:onDiscardAnimationComplete(card)
-  end)
+  -- Use CardRenderState
+  local render_state = self.card_render_state:getState(card.id)
+  render_state.face_up = true
+  -- render_state.x and render_state.y already set by GameView
+
+  Flux.to(render_state, 0.25, { x = Constants.DISCARD_X, y = Constants.DISCARD_Y, rotation = 0 })
+    :oncomplete(function()
+      self:onDiscardAnimationComplete(card)
+    end)
 end
 
 function GameController:onDiscardAnimationComplete(card)
