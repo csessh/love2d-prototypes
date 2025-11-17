@@ -5,7 +5,6 @@ local LayoutCalculator = require("utils/layout_calculator")
 local GameView = {}
 GameView.__index = GameView
 
--- Card scale constant for consistent sizing
 local CARD_SCALE = 2
 
 function GameView.new()
