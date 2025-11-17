@@ -24,7 +24,7 @@ end
 function LayoutCalculator.calculateBottomHandPositions(hand, card_scale)
   local center_x = Constants.SCREEN_WIDTH / 2
   local center_y = Constants.SCREEN_HEIGHT - 70
-  local card_spacing = Constants.CARD_WIDTH * card_scale
+  local card_spacing = Constants.CARD_WIDTH * card_scale - 5
   local total_width = (#hand - 1) * card_spacing
   local start_x = center_x - total_width / 2
 
@@ -44,7 +44,7 @@ end
 function LayoutCalculator.calculateLeftHandPositions(hand, card_scale)
   local x = 150
   local center_y = Constants.SCREEN_HEIGHT / 2
-  local card_spacing = Constants.CARD_WIDTH * card_scale  -- Width becomes vertical spacing when rotated
+  local card_spacing = Constants.CARD_WIDTH * card_scale - 5
   local total_height = (#hand - 1) * card_spacing
   local start_y = center_y - total_height / 2
 
@@ -64,7 +64,7 @@ end
 function LayoutCalculator.calculateTopHandPositions(hand, card_scale)
   local center_x = Constants.SCREEN_WIDTH / 2
   local y = 120
-  local card_spacing = Constants.CARD_WIDTH * card_scale
+  local card_spacing = Constants.CARD_WIDTH * card_scale - 5
   local total_width = (#hand - 1) * card_spacing
   local start_x = center_x - total_width / 2
 
@@ -84,7 +84,7 @@ end
 function LayoutCalculator.calculateRightHandPositions(hand, card_scale)
   local x = Constants.SCREEN_WIDTH - 150
   local center_y = Constants.SCREEN_HEIGHT / 2
-  local card_spacing = Constants.CARD_WIDTH * card_scale
+  local card_spacing = Constants.CARD_WIDTH * card_scale - 5
   local total_height = (#hand - 1) * card_spacing
   local start_y = center_y - total_height / 2
 
@@ -105,13 +105,13 @@ end
 -- This is the position after the card is added to the hand
 function LayoutCalculator.calculateNextCardPosition(player, card_scale)
   card_scale = card_scale or 1
-  local hand_size = #player.hand  -- Size AFTER card will be added
+  local hand_size = #player.hand
 
   if player.position == Constants.POSITIONS.BOTTOM then
     local center_x = Constants.SCREEN_WIDTH / 2
     local center_y = Constants.SCREEN_HEIGHT - 70
-    local card_spacing = Constants.CARD_WIDTH * card_scale
-    local total_width = hand_size * card_spacing  -- Use current size (includes new card)
+    local card_spacing = Constants.CARD_WIDTH * card_scale - 5
+    local total_width = hand_size * card_spacing
     local start_x = center_x - total_width / 2
     local target_x = start_x + hand_size * card_spacing
     return target_x, center_y, 0
@@ -119,7 +119,7 @@ function LayoutCalculator.calculateNextCardPosition(player, card_scale)
   elseif player.position == Constants.POSITIONS.LEFT then
     local x = 150
     local center_y = Constants.SCREEN_HEIGHT / 2
-    local card_spacing = Constants.CARD_WIDTH * card_scale
+    local card_spacing = Constants.CARD_WIDTH * card_scale - 5
     local total_height = hand_size * card_spacing
     local start_y = center_y - total_height / 2
     local target_y = start_y + hand_size * card_spacing
@@ -128,7 +128,7 @@ function LayoutCalculator.calculateNextCardPosition(player, card_scale)
   elseif player.position == Constants.POSITIONS.TOP then
     local center_x = Constants.SCREEN_WIDTH / 2
     local y = 120
-    local card_spacing = Constants.CARD_WIDTH * card_scale
+    local card_spacing = Constants.CARD_WIDTH * card_scale - 5
     local total_width = hand_size * card_spacing
     local start_x = center_x - total_width / 2
     local target_x = start_x + hand_size * card_spacing
@@ -137,7 +137,7 @@ function LayoutCalculator.calculateNextCardPosition(player, card_scale)
   elseif player.position == Constants.POSITIONS.RIGHT then
     local x = Constants.SCREEN_WIDTH - 150
     local center_y = Constants.SCREEN_HEIGHT / 2
-    local card_spacing = Constants.CARD_WIDTH * card_scale
+    local card_spacing = Constants.CARD_WIDTH * card_scale - 5
     local total_height = hand_size * card_spacing
     local start_y = center_y - total_height / 2
     local target_y = start_y + hand_size * card_spacing
