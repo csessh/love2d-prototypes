@@ -1,5 +1,6 @@
 local Constants = require("utils/constants")
 local Flux = require("libraries/flux")
+local LayoutCalculator = require("utils/layout_calculator")
 
 local CARD_SCALE = 2
 local InputController = {}
@@ -99,24 +100,22 @@ function InputController:updateHover()
     return
   end
 
-  -- Calculate card positions (must match GameView:drawBottomPlayer)
-  local center_x = Constants.SCREEN_WIDTH / 2
-  local center_y = Constants.SCREEN_HEIGHT - 70
-  local card_spacing = Constants.CARD_WIDTH
-  local total_width = (#player.hand - 1) * card_spacing
-  local start_x = center_x - total_width / 2
+  -- Use LayoutCalculator for positions
+  local positions = LayoutCalculator.calculateHandPositions(player, CARD_SCALE)
 
   -- Find which card (if any) is being hovered
   -- Check cards in REVERSE order (rightmost/topmost first)
   local new_hovered_index = nil
   for i = #player.hand, 1, -1 do
     local card = player.hand[i]
-    local x = start_x + (i - 1) * card_spacing
-    local y = center_y + (card.hover_offset_y or 0)
+    local pos = positions[card.id]
+    if pos then
+      local y = pos.y + (card.hover_offset_y or 0)
 
-    if self:isPointInCard(self.mouse_x, self.mouse_y, x, y, CARD_SCALE) then
-      new_hovered_index = i
-      break
+      if LayoutCalculator.isPointInCard(self.mouse_x, self.mouse_y, pos.x, y, CARD_SCALE) then
+        new_hovered_index = i
+        break
+      end
     end
   end
 
@@ -163,7 +162,7 @@ function InputController:handleChooseAction(x, y)
   local game_state = self.game_controller.game_state
 
   if
-    self:isPointInCard(x, y, Constants.DECK_X, Constants.DECK_Y, CARD_SCALE)
+    LayoutCalculator.isPointInCard(x, y, Constants.DECK_X, Constants.DECK_Y, CARD_SCALE)
     and not game_state:isDeckEmpty()
   then
     print("Clicked deck - drawing card")
@@ -178,37 +177,24 @@ function InputController:handleDiscardPhase(x, y)
   local game_state = self.game_controller.game_state
   local player = game_state:getCurrentPlayer()
 
-  -- Calculate card positions (must match GameView:drawBottomPlayer)
-  local center_x = Constants.SCREEN_WIDTH / 2
-  local center_y = Constants.SCREEN_HEIGHT - 70
-  local card_spacing = Constants.CARD_WIDTH
-  local total_width = (#player.hand - 1) * card_spacing
-  local start_x = center_x - total_width / 2
+  -- Use LayoutCalculator for positions
+  local positions = LayoutCalculator.calculateHandPositions(player, CARD_SCALE)
 
   -- Check cards in REVERSE order (rightmost/topmost first)
   for i = #player.hand, 1, -1 do
     local card = player.hand[i]
-    local card_x = start_x + (i - 1) * card_spacing
-    local card_y = center_y + (card.hover_offset_y or 0)
+    local pos = positions[card.id]
+    if pos then
+      local card_y = pos.y + (card.hover_offset_y or 0)
 
-    if self:isPointInCard(x, y, card_x, card_y, CARD_SCALE) then
-      print("Discarding card with animation:", card)
-      self.game_controller:startDiscardAnimation(card)
-      self:clearHover() -- Clear hover when discarding
-      return
+      if LayoutCalculator.isPointInCard(x, y, pos.x, card_y, CARD_SCALE) then
+        print("Discarding card with animation:", card)
+        self.game_controller:startDiscardAnimation(card)
+        self:clearHover() -- Clear hover when discarding
+        return
+      end
     end
   end
-end
-
-function InputController:isPointInCard(px, py, card_x, card_y, scale)
-  scale = scale or 1
-  local half_w = (Constants.CARD_WIDTH * scale) / 2
-  local half_h = (Constants.CARD_HEIGHT * scale) / 2
-
-  return px >= card_x - half_w
-    and px <= card_x + half_w
-    and py >= card_y - half_h
-    and py <= card_y + half_h
 end
 
 return InputController

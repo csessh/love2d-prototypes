@@ -2,6 +2,7 @@ local AIController = require("controllers/ai_controller")
 local Constants = require("utils/constants")
 local Flux = require("libraries/flux")
 local GameState = require("models/game_state")
+local LayoutCalculator = require("utils/layout_calculator")
 
 local GameController = {}
 GameController.__index = GameController
@@ -139,47 +140,10 @@ function GameController:endTurn()
 end
 
 function GameController:calculateCardTargetPosition(player)
-  local hand_size = #player.hand
-  local card_spacing = Constants.CARD_WIDTH
-  local rotation = 0
-
-  if player.position == Constants.POSITIONS.BOTTOM then
-    local center_x = Constants.SCREEN_WIDTH / 2
-    local center_y = Constants.SCREEN_HEIGHT - 70
-    local total_width = hand_size * card_spacing
-    local start_x = center_x - total_width / 2
-    local target_x = start_x + hand_size * card_spacing
-    local target_y = center_y
-    return target_x, target_y, rotation
-  elseif player.position == Constants.POSITIONS.LEFT then
-    local x = 150
-    local center_y = Constants.SCREEN_HEIGHT / 2
-    local total_height = hand_size * card_spacing
-    local start_y = center_y - total_height / 2
-    local target_x = x
-    local target_y = start_y + hand_size * card_spacing
-    rotation = math.pi / 2
-    return target_x, target_y, rotation
-  elseif player.position == Constants.POSITIONS.TOP then
-    local center_x = Constants.SCREEN_WIDTH / 2
-    local y = 120
-    local total_width = hand_size * card_spacing
-    local start_x = center_x - total_width / 2
-    local target_x = start_x + hand_size * card_spacing
-    local target_y = y
-    return target_x, target_y, rotation
-  elseif player.position == Constants.POSITIONS.RIGHT then
-    local x = Constants.SCREEN_WIDTH - 150
-    local center_y = Constants.SCREEN_HEIGHT / 2
-    local total_height = hand_size * card_spacing
-    local start_y = center_y - total_height / 2
-    local target_x = x
-    local target_y = start_y + hand_size * card_spacing
-    rotation = math.pi / 2
-    return target_x, target_y, rotation
-  end
-
-  return 0, 0, 0
+  -- Card scale must match GameView's CARD_SCALE (which is 2)
+  -- TODO: Make this a constant instead of hardcoded
+  local CARD_SCALE = 2
+  return LayoutCalculator.calculateNextCardPosition(player, CARD_SCALE)
 end
 
 function GameController:startDrawAnimation(card, target_x, target_y, rotation)
