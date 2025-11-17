@@ -115,9 +115,9 @@ test("addCardToHand: add single card", function()
   local player = Player.new(1, "human", Constants.POSITIONS.BOTTOM)
   local card = Card.new("hearts", 7)
 
-  player:addCardToHand(card)
-  assert_equal(player:getHandSize(), 1, "Hand size should be 1")
-  assert_true(player:hasCard(card), "Player should have the card")
+  player:add_card_to_hand(card)
+  assert_equal(player:get_hand_size(), 1, "Hand size should be 1")
+  assert_true(player:has_card(card), "Player should have the card")
 end)
 
 test("addCardToHand: add multiple cards", function()
@@ -126,14 +126,14 @@ test("addCardToHand: add multiple cards", function()
   local card2 = Card.new("spades", 10)
   local card3 = Card.new("diamonds", 1)
 
-  player:addCardToHand(card1)
-  player:addCardToHand(card2)
-  player:addCardToHand(card3)
+  player:add_card_to_hand(card1)
+  player:add_card_to_hand(card2)
+  player:add_card_to_hand(card3)
 
-  assert_equal(player:getHandSize(), 3, "Hand size should be 3")
-  assert_true(player:hasCard(card1), "Player should have card1")
-  assert_true(player:hasCard(card2), "Player should have card2")
-  assert_true(player:hasCard(card3), "Player should have card3")
+  assert_equal(player:get_hand_size(), 3, "Hand size should be 3")
+  assert_true(player:has_card(card1), "Player should have card1")
+  assert_true(player:has_card(card2), "Player should have card2")
+  assert_true(player:has_card(card3), "Player should have card3")
 end)
 
 -- Test removing cards from hand
@@ -141,12 +141,12 @@ test("removeCardFromHand: remove existing card", function()
   local player = Player.new(1, "human", Constants.POSITIONS.BOTTOM)
   local card = Card.new("hearts", 7)
 
-  player:addCardToHand(card)
-  local removed = player:removeCardFromHand(card)
+  player:add_card_to_hand(card)
+  local removed = player:remove_card_from_hand(card)
 
   assert_true(removed, "Should return true when card is removed")
-  assert_equal(player:getHandSize(), 0, "Hand should be empty after removal")
-  assert_false(player:hasCard(card), "Player should not have the card")
+  assert_equal(player:get_hand_size(), 0, "Hand should be empty after removal")
+  assert_false(player:has_card(card), "Player should not have the card")
 end)
 
 test("removeCardFromHand: remove non-existing card", function()
@@ -154,11 +154,11 @@ test("removeCardFromHand: remove non-existing card", function()
   local card1 = Card.new("hearts", 7)
   local card2 = Card.new("spades", 10)
 
-  player:addCardToHand(card1)
-  local removed = player:removeCardFromHand(card2)
+  player:add_card_to_hand(card1)
+  local removed = player:remove_card_from_hand(card2)
 
   assert_false(removed, "Should return false when card doesn't exist")
-  assert_equal(player:getHandSize(), 1, "Hand size should remain 1")
+  assert_equal(player:get_hand_size(), 1, "Hand size should remain 1")
 end)
 
 test("removeCardFromHand: remove from multiple cards", function()
@@ -167,16 +167,16 @@ test("removeCardFromHand: remove from multiple cards", function()
   local card2 = Card.new("spades", 10)
   local card3 = Card.new("diamonds", 1)
 
-  player:addCardToHand(card1)
-  player:addCardToHand(card2)
-  player:addCardToHand(card3)
+  player:add_card_to_hand(card1)
+  player:add_card_to_hand(card2)
+  player:add_card_to_hand(card3)
 
-  player:removeCardFromHand(card2)
+  player:remove_card_from_hand(card2)
 
-  assert_equal(player:getHandSize(), 2, "Hand size should be 2")
-  assert_true(player:hasCard(card1), "Player should still have card1")
-  assert_false(player:hasCard(card2), "Player should not have card2")
-  assert_true(player:hasCard(card3), "Player should still have card3")
+  assert_equal(player:get_hand_size(), 2, "Hand size should be 2")
+  assert_true(player:has_card(card1), "Player should still have card1")
+  assert_false(player:has_card(card2), "Player should not have card2")
+  assert_true(player:has_card(card3), "Player should still have card3")
 end)
 
 -- Test hasCard
@@ -184,8 +184,8 @@ test("hasCard: check for existing card", function()
   local player = Player.new(1, "human", Constants.POSITIONS.BOTTOM)
   local card = Card.new("hearts", 7)
 
-  player:addCardToHand(card)
-  assert_true(player:hasCard(card), "Should return true for existing card")
+  player:add_card_to_hand(card)
+  assert_true(player:has_card(card), "Should return true for existing card")
 end)
 
 test("hasCard: check for non-existing card", function()
@@ -193,59 +193,59 @@ test("hasCard: check for non-existing card", function()
   local card1 = Card.new("hearts", 7)
   local card2 = Card.new("spades", 10)
 
-  player:addCardToHand(card1)
-  assert_false(player:hasCard(card2), "Should return false for non-existing card")
+  player:add_card_to_hand(card1)
+  assert_false(player:has_card(card2), "Should return false for non-existing card")
 end)
 
 -- Test hand size and empty checks
 test("getHandSize: empty hand", function()
   local player = Player.new(1, "human", Constants.POSITIONS.BOTTOM)
-  assert_equal(player:getHandSize(), 0, "Empty hand should have size 0")
+  assert_equal(player:get_hand_size(), 0, "Empty hand should have size 0")
 end)
 
 test("isHandEmpty: empty hand", function()
   local player = Player.new(1, "human", Constants.POSITIONS.BOTTOM)
-  assert_true(player:isHandEmpty(), "Should return true for empty hand")
+  assert_true(player:is_hand_empty(), "Should return true for empty hand")
 end)
 
 test("isHandEmpty: non-empty hand", function()
   local player = Player.new(1, "human", Constants.POSITIONS.BOTTOM)
-  player:addCardToHand(Card.new("hearts", 7))
-  assert_false(player:isHandEmpty(), "Should return false for non-empty hand")
+  player:add_card_to_hand(Card.new("hearts", 7))
+  assert_false(player:is_hand_empty(), "Should return false for non-empty hand")
 end)
 
 -- Test score calculation
 test("calculateScore: empty hand", function()
   local player = Player.new(1, "human", Constants.POSITIONS.BOTTOM)
-  local score = player:calculateScore()
+  local score = player:calculate_score()
   assert_equal(score, 0, "Empty hand should have score 0")
 end)
 
 test("calculateScore: single card", function()
   local player = Player.new(1, "human", Constants.POSITIONS.BOTTOM)
-  player:addCardToHand(Card.new("hearts", 7))  -- 7 points
+  player:add_card_to_hand(Card.new("hearts", 7))  -- 7 points
 
-  local score = player:calculateScore()
+  local score = player:calculate_score()
   assert_equal(score, 7, "Score should be 7")
 end)
 
 test("calculateScore: multiple cards", function()
   local player = Player.new(1, "human", Constants.POSITIONS.BOTTOM)
-  player:addCardToHand(Card.new("hearts", 1))   -- Ace = 1 point
-  player:addCardToHand(Card.new("spades", 13))  -- King = 13 points
-  player:addCardToHand(Card.new("diamonds", 5)) -- 5 = 5 points
+  player:add_card_to_hand(Card.new("hearts", 1))   -- Ace = 1 point
+  player:add_card_to_hand(Card.new("spades", 13))  -- King = 13 points
+  player:add_card_to_hand(Card.new("diamonds", 5)) -- 5 = 5 points
 
-  local score = player:calculateScore()
+  local score = player:calculate_score()
   assert_equal(score, 19, "Score should be 1 + 13 + 5 = 19")
 end)
 
 test("calculateScore: high value cards", function()
   local player = Player.new(1, "human", Constants.POSITIONS.BOTTOM)
-  player:addCardToHand(Card.new("hearts", 11))  -- Jack = 11 points
-  player:addCardToHand(Card.new("spades", 12))  -- Queen = 12 points
-  player:addCardToHand(Card.new("diamonds", 13)) -- King = 13 points
+  player:add_card_to_hand(Card.new("hearts", 11))  -- Jack = 11 points
+  player:add_card_to_hand(Card.new("spades", 12))  -- Queen = 12 points
+  player:add_card_to_hand(Card.new("diamonds", 13)) -- King = 13 points
 
-  local score = player:calculateScore()
+  local score = player:calculate_score()
   assert_equal(score, 36, "Score should be 11 + 12 + 13 = 36")
 end)
 
@@ -256,11 +256,11 @@ test("formHand: form set hand", function()
   local card2 = Card.new("diamonds", 7)
   local card3 = Card.new("clubs", 7)
 
-  player:addCardToHand(card1)
-  player:addCardToHand(card2)
+  player:add_card_to_hand(card1)
+  player:add_card_to_hand(card2)
 
   -- Form hand with card3 as visible card
-  player:formHand("set", {card1, card2, card3}, card3)
+  player:form_hand("set", {card1, card2, card3}, card3)
 
   assert_equal(#player.hands, 1, "Should have 1 formed hand")
   assert_equal(player.hands[1].type, "set", "Hand type should be 'set'")
@@ -275,15 +275,15 @@ test("formHand: removes cards from hand except visible card", function()
   local card2 = Card.new("diamonds", 7)
   local card3 = Card.new("clubs", 7)
 
-  player:addCardToHand(card1)
-  player:addCardToHand(card2)
+  player:add_card_to_hand(card1)
+  player:add_card_to_hand(card2)
 
   -- Form hand with card3 as visible card (from discard)
-  player:formHand("set", {card1, card2, card3}, card3)
+  player:form_hand("set", {card1, card2, card3}, card3)
 
-  assert_equal(player:getHandSize(), 0, "Hand should be empty (card1 and card2 removed)")
-  assert_false(player:hasCard(card1), "Should not have card1 in hand")
-  assert_false(player:hasCard(card2), "Should not have card2 in hand")
+  assert_equal(player:get_hand_size(), 0, "Hand should be empty (card1 and card2 removed)")
+  assert_false(player:has_card(card1), "Should not have card1 in hand")
+  assert_false(player:has_card(card2), "Should not have card2 in hand")
 end)
 
 test("formHand: form sequence hand", function()
@@ -292,10 +292,10 @@ test("formHand: form sequence hand", function()
   local card2 = Card.new("hearts", 6)
   local card3 = Card.new("hearts", 7)
 
-  player:addCardToHand(card1)
-  player:addCardToHand(card2)
+  player:add_card_to_hand(card1)
+  player:add_card_to_hand(card2)
 
-  player:formHand("sequence", {card1, card2, card3}, card3)
+  player:form_hand("sequence", {card1, card2, card3}, card3)
 
   assert_equal(#player.hands, 1, "Should have 1 formed hand")
   assert_equal(player.hands[1].type, "sequence", "Hand type should be 'sequence'")
@@ -308,17 +308,17 @@ test("formHand: multiple hands", function()
   local card1 = Card.new("hearts", 7)
   local card2 = Card.new("diamonds", 7)
   local card3 = Card.new("clubs", 7)
-  player:addCardToHand(card1)
-  player:addCardToHand(card2)
-  player:formHand("set", {card1, card2, card3}, card3)
+  player:add_card_to_hand(card1)
+  player:add_card_to_hand(card2)
+  player:form_hand("set", {card1, card2, card3}, card3)
 
   -- Second hand (sequence)
   local card4 = Card.new("spades", 5)
   local card5 = Card.new("spades", 6)
   local card6 = Card.new("spades", 7)
-  player:addCardToHand(card4)
-  player:addCardToHand(card5)
-  player:formHand("sequence", {card4, card5, card6}, card6)
+  player:add_card_to_hand(card4)
+  player:add_card_to_hand(card5)
+  player:form_hand("sequence", {card4, card5, card6}, card6)
 
   assert_equal(#player.hands, 2, "Should have 2 formed hands")
   assert_equal(#player.hand_area_cards, 2, "Should have 2 cards in hand area")
@@ -332,13 +332,13 @@ test("Integration: deal 9 cards and calculate score", function()
 
   -- Deal 9 cards (simulate dealing)
   for i = 1, 9 do
-    player:addCardToHand(Card.new("hearts", i))
+    player:add_card_to_hand(Card.new("hearts", i))
   end
 
-  assert_equal(player:getHandSize(), 9, "Should have 9 cards")
+  assert_equal(player:get_hand_size(), 9, "Should have 9 cards")
 
   -- Score should be 1+2+3+4+5+6+7+8+9 = 45
-  local score = player:calculateScore()
+  local score = player:calculate_score()
   assert_equal(score, 45, "Score should be 45")
 end)
 
@@ -351,31 +351,31 @@ test("Integration: form hand and check remaining score", function()
   local card3 = Card.new("clubs", 7)    -- 7 points (from discard)
   local card4 = Card.new("spades", 10)  -- 10 points
 
-  player:addCardToHand(card1)
-  player:addCardToHand(card2)
-  player:addCardToHand(card4)
+  player:add_card_to_hand(card1)
+  player:add_card_to_hand(card2)
+  player:add_card_to_hand(card4)
 
   -- Initial score: 7 + 7 + 10 = 24
-  assert_equal(player:calculateScore(), 24, "Initial score should be 24")
+  assert_equal(player:calculate_score(), 24, "Initial score should be 24")
 
   -- Form hand (removes card1 and card2 from hand)
-  player:formHand("set", {card1, card2, card3}, card3)
+  player:form_hand("set", {card1, card2, card3}, card3)
 
   -- Remaining score: only card4 (10 points)
-  assert_equal(player:calculateScore(), 10, "After forming hand, score should be 10")
-  assert_equal(player:getHandSize(), 1, "Should have 1 card left in hand")
+  assert_equal(player:calculate_score(), 10, "After forming hand, score should be 10")
+  assert_equal(player:get_hand_size(), 1, "Should have 1 card left in hand")
 end)
 
 test("Integration: win condition - empty hand", function()
   local player = Player.new(1, "human", Constants.POSITIONS.BOTTOM)
 
-  player:addCardToHand(Card.new("hearts", 7))
-  assert_false(player:isHandEmpty(), "Hand should not be empty")
-  assert_true(player:calculateScore() > 0, "Score should be positive")
+  player:add_card_to_hand(Card.new("hearts", 7))
+  assert_false(player:is_hand_empty(), "Hand should not be empty")
+  assert_true(player:calculate_score() > 0, "Score should be positive")
 
-  player:removeCardFromHand(player.hand[1])
-  assert_true(player:isHandEmpty(), "Hand should be empty")
-  assert_equal(player:calculateScore(), 0, "Score should be 0 when hand is empty")
+  player:remove_card_from_hand(player.hand[1])
+  assert_true(player:is_hand_empty(), "Hand should be empty")
+  assert_equal(player:calculate_score(), 0, "Score should be 0 when hand is empty")
 end)
 
 print("\n=== Test Results ===")
