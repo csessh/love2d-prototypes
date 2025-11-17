@@ -22,25 +22,20 @@ function GameView.new()
   return setmetatable(instance, GameView)
 end
 
-function GameView:draw(game_state, game_controller)
+function GameView:draw(game_state, animation_state)
   love.graphics.clear(0.1, 0.4, 0.2)
   self:draw_deck(game_state)
   self:draw_discard_pile(game_state)
 
-  local card_render_state = game_controller.card_render_state
+  local card_render_state = animation_state.card_render_state
 
   for _, player in ipairs(game_state.players) do
     self:draw_player(player, card_render_state)
   end
 
   -- Draw animating card on top of everything
-  if
-    game_controller
-    and game_controller.animating
-    and game_controller.animation_card
-  then
-    local card = game_controller.animation_card
-    local card_render_state = game_controller.card_render_state
+  if animation_state.animating and animation_state.animation_card then
+    local card = animation_state.animation_card
     local render_state = card_render_state:get_state(card.id)
 
     -- Only draw if render state has valid position

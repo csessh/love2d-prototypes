@@ -219,4 +219,12 @@ function GameController:on_discard_animation_complete(card)
   self.animation_card = nil
 end
 
+function GameController:get_animation_state()
+  return {
+    animating = self.animating,
+    animation_card = self.animation_card,
+    card_render_state = self.card_render_state,
+  }
+end
+
 return GameController

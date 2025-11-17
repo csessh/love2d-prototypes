@@ -8,9 +8,7 @@ local input_controller
 local game_view
 
 function love.load()
-  -- Initialize random seed once at startup for better randomness
   math.randomseed(os.time() + math.floor(love.timer.getTime() * 1000))
-
   love.graphics.setDefaultFilter("nearest", "nearest")
 
   game_controller = GameController.new()
@@ -25,7 +23,8 @@ function love.update(dt)
 end
 
 function love.draw()
-  game_view:draw(game_controller.game_state, game_controller)
+  local animation_state = game_controller:get_animation_state()
+  game_view:draw(game_controller.game_state, animation_state)
 end
 
 function love.mousepressed(x, y, button)
