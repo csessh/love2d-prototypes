@@ -1,14 +1,9 @@
 local Constants = {}
 
--- Screen dimensions
 Constants.SCREEN_WIDTH = 1280
 Constants.SCREEN_HEIGHT = 720
-
--- Card dimensions
 Constants.CARD_WIDTH = 71
 Constants.CARD_HEIGHT = 96
-
--- Rendering scale
 Constants.CARD_SCALE = 2
 
 -- Deck and discard pile positions (calculated to match GameView rendering)
@@ -19,7 +14,6 @@ Constants.DECK_Y = 360 -- SCREEN_HEIGHT / 2
 Constants.DISCARD_X = 721 -- SCREEN_WIDTH / 2 + total_width / 2 - (CARD_WIDTH * CARD_SCALE / 2)
 Constants.DISCARD_Y = 360 -- SCREEN_HEIGHT / 2
 
--- Card suits
 Constants.SUITS = { "hearts", "diamonds", "clubs", "spades" }
 Constants.SUIT_SYMBOLS = {
   hearts = "♥",
@@ -64,7 +58,6 @@ Constants.CARD_POINTS = {
   [13] = 13,
 }
 
--- Game states
 Constants.STATES = {
   MENU = "MENU",
   DEALING = "DEALING",
@@ -74,7 +67,6 @@ Constants.STATES = {
   GAME_OVER = "GAME_OVER",
 }
 
--- Turn substeps
 Constants.TURN_SUBSTEPS = {
   CHOOSE_ACTION = "CHOOSE_ACTION",
   ANIMATING_DRAW = "ANIMATING_DRAW",
@@ -84,20 +76,17 @@ Constants.TURN_SUBSTEPS = {
   CHECK_WIN = "CHECK_WIN",
 }
 
--- Player positions
 Constants.POSITIONS = {
   BOTTOM = "BOTTOM", -- Human
-  LEFT = "LEFT", -- AI 1
-  TOP = "TOP", -- AI 2
-  RIGHT = "RIGHT", -- AI 3
+  LEFT = "LEFT",
+  TOP = "TOP",
+  RIGHT = "RIGHT",
 }
 
 Constants.MAX_PLAYER_COUNT = 4
-
--- Animation durations (seconds)
-Constants.ANIM_DEAL = 0.3
-Constants.ANIM_DRAW = 0.2
-Constants.ANIM_DISCARD = 0.25
-Constants.ANIM_MELD = 0.3
+Constants.ANIM_DEAL_DURATION_S = 0.3
+Constants.ANIM_DRAW_DURATION_S = 0.2
+Constants.ANIM_DISCARD_DURATION_S = 0.25
+Constants.ANIM_MELD_DURATION_S = 0.3
 
 return Constants
