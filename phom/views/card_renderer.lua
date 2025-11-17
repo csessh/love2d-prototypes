@@ -19,36 +19,18 @@ function CardRenderer:loadCardImages()
   -- File naming pattern: card_<suit>_<face_value>.png
   -- Suits: hearts, diamonds, clubs, spades (lowercase)
   -- Face values: A, 02-10 (zero-padded), J, Q, K (uppercase)
-
-  -- Map rank numbers to file face values
-  local rank_to_file = {
-    [1] = "A",
-    [2] = "02",
-    [3] = "03",
-    [4] = "04",
-    [5] = "05",
-    [6] = "06",
-    [7] = "07",
-    [8] = "08",
-    [9] = "09",
-    [10] = "10",
-    [11] = "J",
-    [12] = "Q",
-    [13] = "K",
-  }
-
   -- Load all 52 card images
   for _, suit in ipairs(Constants.SUITS) do
     self.card_images[suit] = {}
 
     for rank = 1, 13 do
-      local face_value = rank_to_file[rank]
-      local filename = string.format("assets/sprites/cards/card_%s_%s.png", suit, face_value)
+      local face_value = Constants.RANK_NAMES[rank]
+      local filename =
+        string.format("assets/sprites/cards/card_%s_%s.png", suit, face_value)
       self.card_images[suit][rank] = love.graphics.newImage(filename)
     end
   end
 
-  -- Load card back image
   self.card_back = love.graphics.newImage("assets/sprites/cards/card_back.png")
 end
 
@@ -73,11 +55,7 @@ end
 function CardRenderer:drawFaceUp(card)
   love.graphics.setColor(1, 1, 1)
   local image = self.card_images[card.suit][card.rank]
-  love.graphics.draw(
-    image,
-    -self.card_width / 2,
-    -self.card_height / 2
-  )
+  love.graphics.draw(image, -self.card_width / 2, -self.card_height / 2)
 end
 
 function CardRenderer:drawFaceDown()

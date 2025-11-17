@@ -197,7 +197,7 @@ function GameController:startDrawAnimation(card, target_x, target_y, rotation)
   card.x = Constants.DECK_X
   card.y = Constants.DECK_Y
   card.rotation = 0
-  card.hover_offset_y = 0 -- Clear any hover offset
+  card.hover_offset_y = 0
 
   rotation = rotation or 0
 
