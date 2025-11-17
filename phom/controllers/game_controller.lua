@@ -94,7 +94,6 @@ function GameController:drawCard()
   local card = self.game_state.deck:draw()
   if card then
     local player = self.game_state:getCurrentPlayer()
-    card.face_up = (player.type == "human")
 
     local target_x, target_y, rotation =
       self:calculateCardTargetPosition(player)
@@ -142,7 +141,10 @@ function GameController:endTurn()
 end
 
 function GameController:calculateCardTargetPosition(player)
-  return LayoutCalculator.calculateNextCardPosition(player, Constants.CARD_SCALE)
+  return LayoutCalculator.calculateNextCardPosition(
+    player,
+    Constants.CARD_SCALE
+  )
 end
 
 function GameController:startDrawAnimation(card, target_x, target_y, rotation)
@@ -167,7 +169,11 @@ function GameController:startDrawAnimation(card, target_x, target_y, rotation)
   rotation = rotation or 0
 
   -- Animate the render state, not the card
-  Flux.to(render_state, 0.3, { x = target_x, y = target_y, rotation = rotation })
+  Flux.to(
+    render_state,
+    0.3,
+    { x = target_x, y = target_y, rotation = rotation }
+  )
     :oncomplete(function()
       print("=== DRAW ANIMATION COMPLETE ===")
       self:onDrawAnimationComplete(card)
@@ -196,10 +202,13 @@ function GameController:startDiscardAnimation(card)
   render_state.face_up = true
   -- render_state.x and render_state.y already set by GameView
 
-  Flux.to(render_state, 0.25, { x = Constants.DISCARD_X, y = Constants.DISCARD_Y, rotation = 0 })
-    :oncomplete(function()
-      self:onDiscardAnimationComplete(card)
-    end)
+  Flux.to(
+    render_state,
+    0.25,
+    { x = Constants.DISCARD_X, y = Constants.DISCARD_Y, rotation = 0 }
+  ):oncomplete(function()
+    self:onDiscardAnimationComplete(card)
+  end)
 end
 
 function GameController:onDiscardAnimationComplete(card)
@@ -213,7 +222,7 @@ function GameController:getAnimationState()
   return {
     animating = self.animating,
     animation_card = self.animation_card,
-    card_render_state = self.card_render_state
+    card_render_state = self.card_render_state,
   }
 end
 
