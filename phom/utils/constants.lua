@@ -8,6 +8,9 @@ Constants.SCREEN_HEIGHT = 720
 Constants.CARD_WIDTH = 71
 Constants.CARD_HEIGHT = 96
 
+-- Rendering scale
+Constants.CARD_SCALE = 2
+
 -- Deck and discard pile positions (calculated to match GameView rendering)
 -- CARD_SCALE = 2, spacing = 20
 -- total_width = (CARD_WIDTH * CARD_SCALE * 2) + spacing = 304

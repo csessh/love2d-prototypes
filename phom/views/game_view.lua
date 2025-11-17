@@ -5,8 +5,6 @@ local LayoutCalculator = require("utils/layout_calculator")
 local GameView = {}
 GameView.__index = GameView
 
-local CARD_SCALE = 2
-
 function GameView.new()
   local instance = {
     card_renderer = CardRenderer.new(),
@@ -29,7 +27,7 @@ function GameView:draw(game_state, game_controller)
   if game_controller and game_controller.animating and game_controller.animation_card then
     local card = game_controller.animation_card
     local render_state = card_render_state:getState(card.id)
-    self.card_renderer:drawCard(card, render_state.x, render_state.y, render_state.rotation, CARD_SCALE)
+    self.card_renderer:drawCard(card, render_state.x, render_state.y, render_state.rotation, Constants.CARD_SCALE)
   end
 
   self:drawUI(game_state)
@@ -39,12 +37,12 @@ function GameView:drawDeck(game_state)
   if not game_state.deck:isEmpty() then
     -- Center both deck and discard pile horizontally, with some spacing between them
     local spacing = 20
-    local total_width = (Constants.CARD_WIDTH * CARD_SCALE * 2) + spacing
-    local deck_x = Constants.SCREEN_WIDTH / 2 - total_width / 2 + (Constants.CARD_WIDTH * CARD_SCALE / 2)
+    local total_width = (Constants.CARD_WIDTH * Constants.CARD_SCALE * 2) + spacing
+    local deck_x = Constants.SCREEN_WIDTH / 2 - total_width / 2 + (Constants.CARD_WIDTH * Constants.CARD_SCALE / 2)
     local deck_y = Constants.SCREEN_HEIGHT / 2
 
     local card = { face_up = false }
-    self.card_renderer:drawCard(card, deck_x, deck_y, 0, CARD_SCALE)
+    self.card_renderer:drawCard(card, deck_x, deck_y, 0, Constants.CARD_SCALE)
 
     love.graphics.setColor(1, 1, 1)
     love.graphics.print(
@@ -58,13 +56,13 @@ end
 function GameView:drawDiscardPile(game_state)
   -- Center both deck and discard pile horizontally, with some spacing between them
   local spacing = 20
-  local total_width = (Constants.CARD_WIDTH * CARD_SCALE * 2) + spacing
-  local discard_x = Constants.SCREEN_WIDTH / 2 + total_width / 2 - (Constants.CARD_WIDTH * CARD_SCALE / 2)
+  local total_width = (Constants.CARD_WIDTH * Constants.CARD_SCALE * 2) + spacing
+  local discard_x = Constants.SCREEN_WIDTH / 2 + total_width / 2 - (Constants.CARD_WIDTH * Constants.CARD_SCALE / 2)
   local discard_y = Constants.SCREEN_HEIGHT / 2
 
   local top_card = game_state:getTopDiscard()
   if top_card then
-    self.card_renderer:drawCard(top_card, discard_x, discard_y, 0, CARD_SCALE)
+    self.card_renderer:drawCard(top_card, discard_x, discard_y, 0, Constants.CARD_SCALE)
   else
     -- Draw placeholder with size * 1.2
     local placeholder_scale = 1.2
@@ -97,7 +95,7 @@ function GameView:drawPlayer(player, card_render_state)
 end
 
 function GameView:drawBottomPlayer(player, card_render_state)
-  local positions = LayoutCalculator.calculateHandPositions(player, CARD_SCALE)
+  local positions = LayoutCalculator.calculateHandPositions(player, Constants.CARD_SCALE)
 
   for i, card in ipairs(player.hand) do
     local pos = positions[card.id]
@@ -111,7 +109,7 @@ function GameView:drawBottomPlayer(player, card_render_state)
 
       local y = pos.y + (render_state.hover_offset_y or 0)
 
-      self.card_renderer:drawCard(card, pos.x, y, 0, CARD_SCALE)
+      self.card_renderer:drawCard(card, pos.x, y, 0, Constants.CARD_SCALE)
     end
   end
 
@@ -121,16 +119,16 @@ function GameView:drawBottomPlayer(player, card_render_state)
   for i, card in ipairs(player.hand_area_cards) do
     self.card_renderer:drawCard(
       card,
-      hand_area_x + (i - 1) * (Constants.CARD_WIDTH * CARD_SCALE),
+      hand_area_x + (i - 1) * (Constants.CARD_WIDTH * Constants.CARD_SCALE),
       hand_area_y,
       0,
-      CARD_SCALE
+      Constants.CARD_SCALE
     )
   end
 end
 
 function GameView:drawLeftPlayer(player, card_render_state)
-  local positions = LayoutCalculator.calculateHandPositions(player, CARD_SCALE)
+  local positions = LayoutCalculator.calculateHandPositions(player, Constants.CARD_SCALE)
 
   for i, card in ipairs(player.hand) do
     local pos = positions[card.id]
@@ -143,7 +141,7 @@ function GameView:drawLeftPlayer(player, card_render_state)
       render_state.rotation = pos.rotation
       render_state.face_up = false
 
-      self.card_renderer:drawCard(card, pos.x, pos.y, pos.rotation, CARD_SCALE)
+      self.card_renderer:drawCard(card, pos.x, pos.y, pos.rotation, Constants.CARD_SCALE)
     end
   end
 
@@ -155,13 +153,13 @@ function GameView:drawLeftPlayer(player, card_render_state)
       hand_area_x + (i - 1) * Constants.CARD_HEIGHT,
       hand_area_y,
       math.pi / 2,
-      CARD_SCALE
+      Constants.CARD_SCALE
     )
   end
 end
 
 function GameView:drawTopPlayer(player, card_render_state)
-  local positions = LayoutCalculator.calculateHandPositions(player, CARD_SCALE)
+  local positions = LayoutCalculator.calculateHandPositions(player, Constants.CARD_SCALE)
 
   for i, card in ipairs(player.hand) do
     local pos = positions[card.id]
@@ -174,7 +172,7 @@ function GameView:drawTopPlayer(player, card_render_state)
       render_state.rotation = pos.rotation
       render_state.face_up = false
 
-      self.card_renderer:drawCard(card, pos.x, pos.y, pos.rotation, CARD_SCALE)
+      self.card_renderer:drawCard(card, pos.x, pos.y, pos.rotation, Constants.CARD_SCALE)
     end
   end
 
@@ -187,13 +185,13 @@ function GameView:drawTopPlayer(player, card_render_state)
       hand_area_x + (i - 1) * Constants.CARD_WIDTH,
       hand_area_y,
       0,
-      CARD_SCALE
+      Constants.CARD_SCALE
     )
   end
 end
 
 function GameView:drawRightPlayer(player, card_render_state)
-  local positions = LayoutCalculator.calculateHandPositions(player, CARD_SCALE)
+  local positions = LayoutCalculator.calculateHandPositions(player, Constants.CARD_SCALE)
 
   for i, card in ipairs(player.hand) do
     local pos = positions[card.id]
@@ -206,7 +204,7 @@ function GameView:drawRightPlayer(player, card_render_state)
       render_state.rotation = pos.rotation
       render_state.face_up = false
 
-      self.card_renderer:drawCard(card, pos.x, pos.y, pos.rotation, CARD_SCALE)
+      self.card_renderer:drawCard(card, pos.x, pos.y, pos.rotation, Constants.CARD_SCALE)
     end
   end
 
@@ -220,7 +218,7 @@ function GameView:drawRightPlayer(player, card_render_state)
       hand_area_x - (i - 1) * Constants.CARD_HEIGHT,
       hand_area_y,
       math.pi / 2,
-      CARD_SCALE
+      Constants.CARD_SCALE
     )
   end
 end

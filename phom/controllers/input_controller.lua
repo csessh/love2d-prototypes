@@ -2,7 +2,6 @@ local Constants = require("utils/constants")
 local Flux = require("libraries/flux")
 local LayoutCalculator = require("utils/layout_calculator")
 
-local CARD_SCALE = 2
 local InputController = {}
 InputController.__index = InputController
 
@@ -101,7 +100,7 @@ function InputController:updateHover()
   end
 
   -- Use LayoutCalculator for positions
-  local positions = LayoutCalculator.calculateHandPositions(player, CARD_SCALE)
+  local positions = LayoutCalculator.calculateHandPositions(player, Constants.CARD_SCALE)
   local card_render_state = self.game_controller.card_render_state
 
   -- Find which card (if any) is being hovered
@@ -114,7 +113,7 @@ function InputController:updateHover()
       local render_state = card_render_state:getState(card.id)
       local y = pos.y + (render_state.hover_offset_y or 0)
 
-      if LayoutCalculator.isPointInCard(self.mouse_x, self.mouse_y, pos.x, y, CARD_SCALE) then
+      if LayoutCalculator.isPointInCard(self.mouse_x, self.mouse_y, pos.x, y, Constants.CARD_SCALE) then
         new_hovered_index = i
         break
       end
@@ -142,7 +141,7 @@ function InputController:updateHover()
       if not render_state.hover_offset_y then
         render_state.hover_offset_y = 0
       end
-      local hover_offset = -(Constants.CARD_HEIGHT * CARD_SCALE * 0.15)
+      local hover_offset = -(Constants.CARD_HEIGHT * Constants.CARD_SCALE * 0.15)
       Flux.to(render_state, 0.1, { hover_offset_y = hover_offset })
     end
   end
@@ -167,7 +166,7 @@ function InputController:handleChooseAction(x, y)
   local game_state = self.game_controller.game_state
 
   if
-    LayoutCalculator.isPointInCard(x, y, Constants.DECK_X, Constants.DECK_Y, CARD_SCALE)
+    LayoutCalculator.isPointInCard(x, y, Constants.DECK_X, Constants.DECK_Y, Constants.CARD_SCALE)
     and not game_state:isDeckEmpty()
   then
     print("Clicked deck - drawing card")
@@ -183,7 +182,7 @@ function InputController:handleDiscardPhase(x, y)
   local player = game_state:getCurrentPlayer()
 
   -- Use LayoutCalculator for positions
-  local positions = LayoutCalculator.calculateHandPositions(player, CARD_SCALE)
+  local positions = LayoutCalculator.calculateHandPositions(player, Constants.CARD_SCALE)
   local card_render_state = self.game_controller.card_render_state
 
   -- Check cards in REVERSE order (rightmost/topmost first)
@@ -194,7 +193,7 @@ function InputController:handleDiscardPhase(x, y)
       local render_state = card_render_state:getState(card.id)
       local card_y = pos.y + (render_state.hover_offset_y or 0)
 
-      if LayoutCalculator.isPointInCard(x, y, pos.x, card_y, CARD_SCALE) then
+      if LayoutCalculator.isPointInCard(x, y, pos.x, card_y, Constants.CARD_SCALE) then
         print("Discarding card with animation:", card)
         self.game_controller:startDiscardAnimation(card)
         self:clearHover() -- Clear hover when discarding

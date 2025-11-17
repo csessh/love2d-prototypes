@@ -142,10 +142,7 @@ function GameController:endTurn()
 end
 
 function GameController:calculateCardTargetPosition(player)
-  -- Card scale must match GameView's CARD_SCALE (which is 2)
-  -- TODO: Make this a constant instead of hardcoded
-  local CARD_SCALE = 2
-  return LayoutCalculator.calculateNextCardPosition(player, CARD_SCALE)
+  return LayoutCalculator.calculateNextCardPosition(player, Constants.CARD_SCALE)
 end
 
 function GameController:startDrawAnimation(card, target_x, target_y, rotation)
