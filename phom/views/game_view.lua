@@ -5,6 +5,16 @@ local LayoutCalculator = require("utils/layout_calculator")
 local GameView = {}
 GameView.__index = GameView
 
+-- MVC CONTRACT:
+-- GameView is a PURE VIEW - it reads state but NEVER mutates Model data.
+-- All rendering is read-only. All state changes happen in Controllers.
+--
+-- Exception: CardRenderState (view-specific state) is mutated to track visual positions.
+-- This is acceptable because it's rendering state, not game logic state.
+--
+-- Temporary: card.face_up is set for rendering compatibility with CardRenderer.
+-- This will be removed once CardRenderer is updated to accept face_up as a parameter.
+
 function GameView.new()
   local instance = {
     card_renderer = CardRenderer.new(),
