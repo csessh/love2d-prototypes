@@ -24,7 +24,8 @@ function love.update(dt)
 end
 
 function love.draw()
-  game_view:draw(game_controller.game_state, game_controller)
+  local animation_state = game_controller:getAnimationState()
+  game_view:draw(game_controller.game_state, animation_state)
 end
 
 function love.mousepressed(x, y, button)
