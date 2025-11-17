@@ -41,7 +41,7 @@ function Deck:size()
   return #self.cards
 end
 
-function Deck:isEmpty()
+function Deck:is_empty()
   return #self.cards == 0
 end
 

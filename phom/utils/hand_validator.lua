@@ -1,6 +1,6 @@
 local HandValidator = {}
 
-function HandValidator.isValidSet(cards)
+function HandValidator.is_valid_set(cards)
   if #cards < 3 then
     return false
   end
@@ -15,7 +15,7 @@ function HandValidator.isValidSet(cards)
   return true
 end
 
-function HandValidator.isValidSequence(cards)
+function HandValidator.is_valid_sequence(cards)
   if #cards < 3 then
     return false
   end
@@ -47,7 +47,7 @@ function HandValidator.isValidSequence(cards)
   return true
 end
 
-function HandValidator.canFormHand(hand_cards, discard_card)
+function HandValidator.can_form_hand(hand_cards, discard_card)
   if not discard_card or #hand_cards < 2 then
     return false
   end
@@ -57,20 +57,20 @@ function HandValidator.canFormHand(hand_cards, discard_card)
     table.insert(all_cards, card)
   end
 
-  return HandValidator.isValidSet(all_cards)
-    or HandValidator.isValidSequence(all_cards)
+  return HandValidator.is_valid_set(all_cards)
+    or HandValidator.is_valid_sequence(all_cards)
 end
 
-function HandValidator.validateHandSelection(selected_cards, discard_card)
-  if HandValidator.canFormHand(selected_cards, discard_card) then
+function HandValidator.validate_hand_selection(selected_cards, discard_card)
+  if HandValidator.can_form_hand(selected_cards, discard_card) then
     local all_cards = { discard_card }
     for _, card in ipairs(selected_cards) do
       table.insert(all_cards, card)
     end
 
-    if HandValidator.isValidSet(all_cards) then
+    if HandValidator.is_valid_set(all_cards) then
       return "set"
-    elseif HandValidator.isValidSequence(all_cards) then
+    elseif HandValidator.is_valid_sequence(all_cards) then
       return "sequence"
     end
   end

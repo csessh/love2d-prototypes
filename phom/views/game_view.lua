@@ -13,11 +13,11 @@ end
 
 function GameView:draw(game_state, game_controller)
   love.graphics.clear(0.1, 0.4, 0.2)
-  self:drawDeck(game_state)
-  self:drawDiscardPile(game_state)
+  self:draw_deck(game_state)
+  self:draw_discard_pile(game_state)
 
   for _, player in ipairs(game_state.players) do
-    self:drawPlayer(player)
+    self:draw_player(player)
   end
 
   -- Draw animating card on top of everything
@@ -28,7 +28,7 @@ function GameView:draw(game_state, game_controller)
   then
     local card = game_controller.animation_card
     local rotation = card.rotation or 0
-    self.card_renderer:drawCard(
+    self.card_renderer:draw_card(
       card,
       card.x,
       card.y,
@@ -37,11 +37,11 @@ function GameView:draw(game_state, game_controller)
     )
   end
 
-  self:drawUI(game_state)
+  self:draw_ui(game_state)
 end
 
-function GameView:drawDeck(game_state)
-  if not game_state.deck:isEmpty() then
+function GameView:draw_deck(game_state)
+  if not game_state.deck:is_empty() then
     -- Center both deck and discard pile horizontally, with some spacing between them
     local spacing = 20
     local total_width = (Constants.CARD_WIDTH * Constants.CARD_SCALE * 2)
@@ -52,7 +52,7 @@ function GameView:drawDeck(game_state)
     local deck_y = Constants.SCREEN_HEIGHT / 2
 
     local card = { face_up = false }
-    self.card_renderer:drawCard(card, deck_x, deck_y, 0, Constants.CARD_SCALE)
+    self.card_renderer:draw_card(card, deck_x, deck_y, 0, Constants.CARD_SCALE)
 
     love.graphics.setColor(1, 1, 1)
     love.graphics.print(
@@ -63,7 +63,7 @@ function GameView:drawDeck(game_state)
   end
 end
 
-function GameView:drawDiscardPile(game_state)
+function GameView:draw_discard_pile(game_state)
   -- Center both deck and discard pile horizontally, with some spacing between them
   local spacing = 20
   local total_width = (Constants.CARD_WIDTH * Constants.CARD_SCALE * 2)
@@ -73,9 +73,9 @@ function GameView:drawDiscardPile(game_state)
     - (Constants.CARD_WIDTH * Constants.CARD_SCALE / 2)
   local discard_y = Constants.SCREEN_HEIGHT / 2
 
-  local top_card = game_state:getTopDiscard()
+  local top_card = game_state:get_top_discard()
   if top_card then
-    self.card_renderer:drawCard(
+    self.card_renderer:draw_card(
       top_card,
       discard_x,
       discard_y,
@@ -101,19 +101,19 @@ function GameView:drawDiscardPile(game_state)
   love.graphics.print("Discard", discard_x - 30, discard_y + 110)
 end
 
-function GameView:drawPlayer(player)
+function GameView:draw_player(player)
   if player.position == Constants.POSITIONS.BOTTOM then
-    self:drawBottomPlayer(player)
+    self:draw_bottom_player(player)
   elseif player.position == Constants.POSITIONS.LEFT then
-    self:drawLeftPlayer(player)
+    self:draw_left_player(player)
   elseif player.position == Constants.POSITIONS.TOP then
-    self:drawTopPlayer(player)
+    self:draw_top_player(player)
   elseif player.position == Constants.POSITIONS.RIGHT then
-    self:drawRightPlayer(player)
+    self:draw_right_player(player)
   end
 end
 
-function GameView:drawBottomPlayer(player)
+function GameView:draw_bottom_player(player)
   local center_x = Constants.SCREEN_WIDTH / 2
   local center_y = Constants.SCREEN_HEIGHT - 70
 
@@ -128,14 +128,14 @@ function GameView:drawBottomPlayer(player)
     card.x = x
     card.y = y
     card.face_up = player.type == "human"
-    self.card_renderer:drawCard(card, x, y, 0, Constants.CARD_SCALE)
+    self.card_renderer:draw_card(card, x, y, 0, Constants.CARD_SCALE)
   end
 
   -- Draw hand area cards
   local hand_area_x = 100
   local hand_area_y = Constants.SCREEN_HEIGHT - 30
   for i, card in ipairs(player.hand_area_cards) do
-    self.card_renderer:drawCard(
+    self.card_renderer:draw_card(
       card,
       hand_area_x + (i - 1) * (Constants.CARD_WIDTH * Constants.CARD_SCALE),
       hand_area_y,
@@ -145,7 +145,7 @@ function GameView:drawBottomPlayer(player)
   end
 end
 
-function GameView:drawLeftPlayer(player)
+function GameView:draw_left_player(player)
   local x = 150
   local center_y = Constants.SCREEN_HEIGHT / 2
 
@@ -160,13 +160,13 @@ function GameView:drawLeftPlayer(player)
     card.y = y
     card.rotation = math.pi / 2
     card.face_up = false
-    self.card_renderer:drawCard(card, x, y, math.pi / 2, Constants.CARD_SCALE)
+    self.card_renderer:draw_card(card, x, y, math.pi / 2, Constants.CARD_SCALE)
   end
 
   local hand_area_x = x + 180
   local hand_area_y = center_y
   for i, card in ipairs(player.hand_area_cards) do
-    self.card_renderer:drawCard(
+    self.card_renderer:draw_card(
       card,
       hand_area_x + (i - 1) * Constants.CARD_HEIGHT,
       hand_area_y,
@@ -176,7 +176,7 @@ function GameView:drawLeftPlayer(player)
   end
 end
 
-function GameView:drawTopPlayer(player)
+function GameView:draw_top_player(player)
   local center_x = Constants.SCREEN_WIDTH / 2
   local y = 120
 
@@ -191,13 +191,13 @@ function GameView:drawTopPlayer(player)
     card.y = y
     card.rotation = 0
     card.face_up = false
-    self.card_renderer:drawCard(card, x, y, 0, Constants.CARD_SCALE)
+    self.card_renderer:draw_card(card, x, y, 0, Constants.CARD_SCALE)
   end
 
   local hand_area_x = center_x - 100
   local hand_area_y = y + 150
   for i, card in ipairs(player.hand_area_cards) do
-    self.card_renderer:drawCard(
+    self.card_renderer:draw_card(
       card,
       hand_area_x + (i - 1) * Constants.CARD_WIDTH,
       hand_area_y,
@@ -207,7 +207,7 @@ function GameView:drawTopPlayer(player)
   end
 end
 
-function GameView:drawRightPlayer(player)
+function GameView:draw_right_player(player)
   local x = Constants.SCREEN_WIDTH - 150
   local center_y = Constants.SCREEN_HEIGHT / 2
 
@@ -222,13 +222,13 @@ function GameView:drawRightPlayer(player)
     card.y = y
     card.rotation = math.pi / 2
     card.face_up = false
-    self.card_renderer:drawCard(card, x, y, math.pi / 2, Constants.CARD_SCALE)
+    self.card_renderer:draw_card(card, x, y, math.pi / 2, Constants.CARD_SCALE)
   end
 
   local hand_area_x = x - 180
   local hand_area_y = center_y
   for i, card in ipairs(player.hand_area_cards) do
-    self.card_renderer:drawCard(
+    self.card_renderer:draw_card(
       card,
       hand_area_x - (i - 1) * Constants.CARD_HEIGHT,
       hand_area_y,
@@ -238,7 +238,7 @@ function GameView:drawRightPlayer(player)
   end
 end
 
-function GameView:drawHandInRow(cards, center_x, center_y, face_up, scale)
+function GameView:draw_hand_in_row(cards, center_x, center_y, face_up, scale)
   if #cards == 0 then
     return
   end
@@ -251,21 +251,21 @@ function GameView:drawHandInRow(cards, center_x, center_y, face_up, scale)
   for i, card in ipairs(cards) do
     local x = start_x + (i - 1) * card_spacing
     card.face_up = face_up
-    self.card_renderer:drawCard(card, x, center_y, 0, scale)
+    self.card_renderer:draw_card(card, x, center_y, 0, scale)
   end
 end
 
-function GameView:drawUI(game_state)
+function GameView:draw_ui(game_state)
   love.graphics.setColor(1, 1, 1)
   love.graphics.print("Round: " .. game_state.round_number, 10, 10)
   love.graphics.print("State: " .. game_state.current_state, 10, 30)
 
   -- Draw turn indicator
-  self:drawTurnIndicator(game_state)
+  self:draw_turn_indicator(game_state)
 end
 
-function GameView:drawTurnIndicator(game_state)
-  local current_player = game_state:getCurrentPlayer()
+function GameView:draw_turn_indicator(game_state)
+  local current_player = game_state:get_current_player()
   if not current_player then
     return
   end

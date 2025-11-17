@@ -10,11 +10,11 @@ function CardRenderer.new()
     card_back = nil,
   }
   setmetatable(instance, { __index = CardRenderer })
-  instance:loadCardImages()
+  instance:load_card_images()
   return instance
 end
 
-function CardRenderer:loadCardImages()
+function CardRenderer:load_card_images()
   -- Load individual card images
   -- File naming pattern: card_<suit>_<face_value>.png
   -- Suits: hearts, diamonds, clubs, spades (lowercase)
@@ -34,7 +34,7 @@ function CardRenderer:loadCardImages()
   self.card_back = love.graphics.newImage("assets/sprites/cards/card_back.png")
 end
 
-function CardRenderer:drawCard(card, x, y, rotation, scale)
+function CardRenderer:draw_card(card, x, y, rotation, scale)
   rotation = rotation or 0
   scale = scale or 1
 
@@ -44,21 +44,21 @@ function CardRenderer:drawCard(card, x, y, rotation, scale)
   love.graphics.scale(scale, scale)
 
   if card.face_up then
-    self:drawFaceUp(card)
+    self:draw_face_up(card)
   else
-    self:drawFaceDown()
+    self:draw_face_down()
   end
 
   love.graphics.pop()
 end
 
-function CardRenderer:drawFaceUp(card)
+function CardRenderer:draw_face_up(card)
   love.graphics.setColor(1, 1, 1)
   local image = self.card_images[card.suit][card.rank]
   love.graphics.draw(image, -self.card_width / 2, -self.card_height / 2)
 end
 
-function CardRenderer:drawFaceDown()
+function CardRenderer:draw_face_down()
   love.graphics.setColor(1, 1, 1)
   love.graphics.draw(
     self.card_back,

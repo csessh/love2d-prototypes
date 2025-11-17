@@ -17,7 +17,7 @@ function InputController.new(game_controller)
 end
 
 function InputController:update(dt)
-  self:updateHover()
+  self:update_hover()
 end
 
 function InputController:mousepressed(x, y, button)
@@ -51,11 +51,11 @@ function InputController:mousepressed(x, y, button)
 
   if game_state.current_state == Constants.STATES.PLAYER_TURN then
     if game_state.turn_substep == Constants.TURN_SUBSTEPS.CHOOSE_ACTION then
-      print("Calling handleChooseAction")
-      self:handleChooseAction(x, y)
+      print("Calling handle_choose_action")
+      self:handle_choose_action(x, y)
     elseif game_state.turn_substep == Constants.TURN_SUBSTEPS.DISCARD_PHASE then
-      print("Calling handleDiscardPhase")
-      self:handleDiscardPhase(x, y)
+      print("Calling handle_discard_phase")
+      self:handle_discard_phase(x, y)
     else
       print("Unknown substep:", game_state.turn_substep)
     end
@@ -69,32 +69,32 @@ function InputController:mousemoved(x, y)
   self.mouse_y = y
 end
 
-function InputController:updateHover()
+function InputController:update_hover()
   local game_state = self.game_controller.game_state
 
   if self.game_controller.animating then
-    self:clearHover()
+    self:clear_hover()
     return
   end
 
   if game_state.turn_substep == Constants.TURN_SUBSTEPS.ANIMATING_DRAW then
-    self:clearHover()
+    self:clear_hover()
     return
   end
 
   if game_state.turn_substep == Constants.TURN_SUBSTEPS.ANIMATING_DISCARD then
-    self:clearHover()
+    self:clear_hover()
     return
   end
 
   if game_state.current_state ~= Constants.STATES.PLAYER_TURN then
-    self:clearHover()
+    self:clear_hover()
     return
   end
 
-  local player = game_state:getCurrentPlayer()
+  local player = game_state:get_current_player()
   if player.type ~= "human" then
-    self:clearHover()
+    self:clear_hover()
     return
   end
 
@@ -113,7 +113,7 @@ function InputController:updateHover()
     local y = center_y + (card.hover_offset_y or 0)
 
     if
-      self:isPointInCard(self.mouse_x, self.mouse_y, x, y, Constants.CARD_SCALE)
+      self:is_point_in_card(self.mouse_x, self.mouse_y, x, y, Constants.CARD_SCALE)
     then
       new_hovered_index = i
       break
@@ -150,10 +150,10 @@ function InputController:updateHover()
   end
 end
 
-function InputController:clearHover()
+function InputController:clear_hover()
   if self.hovered_card_index then
     local game_state = self.game_controller.game_state
-    local player = game_state:getCurrentPlayer()
+    local player = game_state:get_current_player()
     if player and player.hand[self.hovered_card_index] then
       local card = player.hand[self.hovered_card_index]
       if card.hover_offset_y then
@@ -164,31 +164,31 @@ function InputController:clearHover()
   end
 end
 
-function InputController:handleChooseAction(x, y)
+function InputController:handle_choose_action(x, y)
   local game_state = self.game_controller.game_state
 
   if
-    self:isPointInCard(
+    self:is_point_in_card(
       x,
       y,
       Constants.DECK_X,
       Constants.DECK_Y,
       Constants.CARD_SCALE
-    ) and not game_state:isDeckEmpty()
+    ) and not game_state:is_deck_empty()
   then
     print("Clicked deck - drawing card")
-    self.game_controller:drawCard()
+    self.game_controller:draw_card()
     return
   end
 
   -- TODO: Handle clicking on hand cards for meld formation
 end
 
-function InputController:handleDiscardPhase(x, y)
+function InputController:handle_discard_phase(x, y)
   local game_state = self.game_controller.game_state
-  local player = game_state:getCurrentPlayer()
+  local player = game_state:get_current_player()
 
-  -- Calculate card positions (must match GameView:drawBottomPlayer)
+  -- Calculate card positions (must match GameView:draw_bottom_player)
   local center_x = Constants.SCREEN_WIDTH / 2
   local center_y = Constants.SCREEN_HEIGHT - 70
   local total_width = (#player.hand - 1) * Constants.CARD_WIDTH
@@ -200,16 +200,16 @@ function InputController:handleDiscardPhase(x, y)
     local card_x = start_x + (i - 1) * Constants.CARD_WIDTH
     local card_y = center_y + (card.hover_offset_y or 0)
 
-    if self:isPointInCard(x, y, card_x, card_y, Constants.CARD_SCALE) then
+    if self:is_point_in_card(x, y, card_x, card_y, Constants.CARD_SCALE) then
       print("Discarding card with animation:", card)
-      self.game_controller:startDiscardAnimation(card)
-      self:clearHover() -- Clear hover when discarding
+      self.game_controller:start_discard_animation(card)
+      self:clear_hover() -- Clear hover when discarding
       return
     end
   end
 end
 
-function InputController:isPointInCard(px, py, card_x, card_y, scale)
+function InputController:is_point_in_card(px, py, card_x, card_y, scale)
   scale = scale or 1
   local half_w = (Constants.CARD_WIDTH * scale) / 2
   local half_h = (Constants.CARD_HEIGHT * scale) / 2

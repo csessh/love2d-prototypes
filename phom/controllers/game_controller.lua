@@ -24,40 +24,40 @@ function GameController:update(dt)
   self.ai_controller:update(dt)
 
   if self.game_state.current_state == Constants.STATES.MENU then
-    self:handleMenu()
+    self:handle_menu()
   elseif self.game_state.current_state == Constants.STATES.DEALING then
-    self:handleDealing()
+    self:handle_dealing()
   elseif self.game_state.current_state == Constants.STATES.PLAYER_TURN then
-    self:handlePlayerTurn()
+    self:handle_player_turn()
   elseif self.game_state.current_state == Constants.STATES.ROUND_END then
-    self:handleRoundEnd()
+    self:handle_round_end()
   elseif self.game_state.current_state == Constants.STATES.GAME_OVER then
-    self:handleGameOver()
+    self:handle_game_over()
   end
 end
 
-function GameController:handleMenu()
-  self:startNewRound()
+function GameController:handle_menu()
+  self:start_new_round()
 end
 
-function GameController:startNewRound()
+function GameController:start_new_round()
   self.game_state = GameState.new()
   self.game_state.current_state = Constants.STATES.DEALING
 end
 
-function GameController:handleDealing()
+function GameController:handle_dealing()
   -- Deal cards (no animation for now)
   -- TODO: Add drawing animations
-  self.game_state:dealCards(9)
+  self.game_state:deal_cards(9)
 
   -- TODO: This might not be correct. Review later.
   local first_discard = self.game_state.deck:draw()
   if first_discard then
-    self.game_state:addToDiscard(first_discard)
+    self.game_state:add_to_discard(first_discard)
   end
 
   -- Set initial state based on who starts (current_player_index was randomized)
-  local starting_player = self.game_state:getCurrentPlayer()
+  local starting_player = self.game_state:get_current_player()
   if starting_player.type == "human" then
     self.game_state.current_state = Constants.STATES.PLAYER_TURN
     self.game_state.turn_substep = Constants.TURN_SUBSTEPS.CHOOSE_ACTION
@@ -66,13 +66,13 @@ function GameController:handleDealing()
   end
 end
 
-function GameController:handlePlayerTurn()
+function GameController:handle_player_turn()
   -- Input handled by InputController
   -- Just manage substeps here
 end
 
-function GameController:handleRoundEnd()
-  self.game_state:calculateAllScores()
+function GameController:handle_round_end()
+  self.game_state:calculate_all_scores()
   print("Round ended!")
   for _, player in ipairs(self.game_state.players) do
     print(
@@ -83,53 +83,53 @@ function GameController:handleRoundEnd()
   self.game_state.current_state = Constants.STATES.GAME_OVER
 end
 
-function GameController:handleGameOver()
+function GameController:handle_game_over()
   -- Wait for restart
 end
 
-function GameController:drawCard()
+function GameController:draw_card()
   local card = self.game_state.deck:draw()
   if card then
-    local player = self.game_state:getCurrentPlayer()
+    local player = self.game_state:get_current_player()
     card.face_up = (player.type == "human")
 
     local target_x, target_y, rotation =
-      self:calculateCardTargetPosition(player)
+      self:calculate_card_target_position(player)
 
-    self:startDrawAnimation(card, target_x, target_y, rotation)
+    self:start_draw_animation(card, target_x, target_y, rotation)
   end
 end
 
-function GameController:discardCard(card)
-  local current_player = self.game_state:getCurrentPlayer()
+function GameController:discard_card(card)
+  local current_player = self.game_state:get_current_player()
 
   if current_player.type == "human" then
     -- Human player already uses animation via InputController
-    if current_player:removeCardFromHand(card) then
-      self.game_state:addToDiscard(card)
-      self:endTurn()
+    if current_player:remove_card_from_hand(card) then
+      self.game_state:add_to_discard(card)
+      self:end_turn()
     end
   else
     -- AI player: use animation
-    self:startDiscardAnimation(card)
+    self:start_discard_animation(card)
   end
 end
 
-function GameController:endTurn()
-  local winner = self.game_state:checkWinCondition()
+function GameController:end_turn()
+  local winner = self.game_state:check_win_condition()
   if winner then
     self.game_state.current_state = Constants.STATES.ROUND_END
     return
   end
 
-  self.game_state:nextPlayer()
+  self.game_state:next_player()
 
-  if self.game_state:isDeckEmpty() then
+  if self.game_state:is_deck_empty() then
     self.game_state.current_state = Constants.STATES.ROUND_END
     return
   end
 
-  local next_player = self.game_state:getCurrentPlayer()
+  local next_player = self.game_state:get_current_player()
   if next_player.type == "human" then
     self.game_state.current_state = Constants.STATES.PLAYER_TURN
     self.game_state.turn_substep = Constants.TURN_SUBSTEPS.CHOOSE_ACTION
@@ -138,7 +138,7 @@ function GameController:endTurn()
   end
 end
 
-function GameController:calculateCardTargetPosition(player)
+function GameController:calculate_card_target_position(player)
   local hand_size = #player.hand
   local card_spacing = Constants.CARD_WIDTH
   local rotation = 0
@@ -182,7 +182,7 @@ function GameController:calculateCardTargetPosition(player)
   return 0, 0, 0
 end
 
-function GameController:startDrawAnimation(card, target_x, target_y, rotation)
+function GameController:start_draw_animation(card, target_x, target_y, rotation)
   print("=== START DRAW ANIMATION ===")
   print("Card:", card)
   print("From:", Constants.DECK_X, Constants.DECK_Y)
@@ -204,26 +204,26 @@ function GameController:startDrawAnimation(card, target_x, target_y, rotation)
   Flux.to(card, 0.3, { x = target_x, y = target_y, rotation = rotation })
     :oncomplete(function()
       print("=== DRAW ANIMATION COMPLETE ===")
-      self:onDrawAnimationComplete(card)
+      self:on_draw_animation_complete(card)
     end)
 end
 
-function GameController:onDrawAnimationComplete(card)
-  local player = self.game_state:getCurrentPlayer()
-  player:addCardToHand(card)
+function GameController:on_draw_animation_complete(card)
+  local player = self.game_state:get_current_player()
+  player:add_card_to_hand(card)
 
   self.game_state.turn_substep = Constants.TURN_SUBSTEPS.DISCARD_PHASE
   self.animating = false
   self.animation_card = nil
 end
 
-function GameController:startDiscardAnimation(card)
+function GameController:start_discard_animation(card)
   self.animating = true
   self.animation_card = card
   self.game_state.turn_substep = Constants.TURN_SUBSTEPS.ANIMATING_DISCARD
 
-  local player = self.game_state:getCurrentPlayer()
-  player:removeCardFromHand(card)
+  local player = self.game_state:get_current_player()
+  player:remove_card_from_hand(card)
   card.face_up = true
 
   -- Card position should already be set by GameView
@@ -234,13 +234,13 @@ function GameController:startDiscardAnimation(card)
     y = Constants.DISCARD_Y,
     rotation = 0,
   }):oncomplete(function()
-    self:onDiscardAnimationComplete(card)
+    self:on_discard_animation_complete(card)
   end)
 end
 
-function GameController:onDiscardAnimationComplete(card)
-  self.game_state:addToDiscard(card)
-  self:endTurn()
+function GameController:on_discard_animation_complete(card)
+  self.game_state:add_to_discard(card)
+  self:end_turn()
   self.animating = false
   self.animation_card = nil
 end

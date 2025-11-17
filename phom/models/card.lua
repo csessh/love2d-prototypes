@@ -17,20 +17,20 @@ function Card.new(suit, rank)
   return setmetatable(instance, Card)
 end
 
-function Card:getPointValue()
+function Card:get_point_value()
   return Constants.CARD_POINTS[self.rank]
 end
 
-function Card:getRankName()
+function Card:get_rank_name()
   return Constants.RANK_NAMES[self.rank]
 end
 
-function Card:getSuitSymbol()
+function Card:get_suit_symbol()
   return Constants.SUIT_SYMBOLS[self.suit]
 end
 
 function Card:__tostring()
-  return self:getRankName() .. self:getSuitSymbol()
+  return self:get_rank_name() .. self:get_suit_symbol()
 end
 
 return Card
