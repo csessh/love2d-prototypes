@@ -1,6 +1,41 @@
-# Implementation Session Progress - 2025-11-13
+# Implementation Session Progress
 
-## Session Summary
+## Latest Session: MVC Refactoring (2025-11-17)
+
+**Date:** 2025-11-17
+**Branch:** `refactor/mvc-separation`
+**Working Directory:** `/home/tdo/Documents/love2d/phom`
+
+**Overall Progress:** MVC Refactoring Complete (6/6 tasks) + Bug Fix
+
+### Session Summary
+
+**What Was Accomplished:**
+1. ✅ Completed all 6 MVC refactoring tasks
+2. ✅ Fixed card rendering bug (face_up property)
+3. ✅ Adjusted card spacing (5px overlap)
+4. ✅ All 68 unit tests passing
+5. ✅ Created comprehensive architecture documentation
+
+**Commits Made:**
+- `6dddb11` - Task 1: Create LayoutCalculator utility
+- `740c96e` - Task 2: Create CardRenderState system
+- `b62518c` - Task 3: Verify GameView purity
+- `6cb13a5` - Task 4: Extract CARD_SCALE constant
+- `1f3ed96` - Task 5: Reduce View-Controller coupling
+- `37337eb` - Task 6: Create architecture documentation
+- `c6c2a18` - Adjust card spacing to 5px overlap
+- (pending) - Fix card face_up rendering bug
+
+**Next Steps:**
+1. Visual test the game
+2. Potentially adjust CARD_SCALE from 2 to 1
+3. Create and merge PR
+4. Resume feature development
+
+---
+
+## Previous Session: Bugs and Features (2025-11-13)
 
 **Date:** 2025-11-13
 **Branch:** `feature/phom-card-game`

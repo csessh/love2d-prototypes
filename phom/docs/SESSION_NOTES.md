@@ -1,48 +1,77 @@
 # Session Notes - Phỏm Card Game Development
 
-## Current Session Summary (2025-11-13)
+## Current Session Summary (2025-11-17)
 
 ### What We Did Today
 
-1. **Reviewed MVC Architecture** ✅
-   - Identified violations and anti-patterns
-   - Found rendering state mixed into Models
-   - Found Views mutating Models during draw
-   - Found duplicated position logic across 3 files
+1. **Completed MVC Refactoring** ✅
+   - All 6 tasks completed successfully
+   - Created LayoutCalculator utility (centralized position calculations)
+   - Created CardRenderState system (separated visual from game state)
+   - Eliminated View mutations of Models
+   - Extracted CARD_SCALE constant
+   - Cleaned up View-Controller coupling
+   - Added comprehensive architecture documentation
 
-2. **Created Task 17 in Feature Plan** ✅
-   - Added "Player Meld Area and Individual Discard Piles"
-   - Individual discard piles per player
-   - Meld area visualization
-   - Cards spread horizontally (not stacked)
+2. **Fixed Card Rendering Bug** ✅
+   - Issue: Cards in discard pile rendering face down
+   - Root cause: CardRenderer checking `card.face_up` (removed in MVC refactor)
+   - Solution: Added `face_up` parameter to CardRenderer:drawCard()
+   - Updated all drawCard() calls to pass face_up value
+   - Removed obsolete `card.face_up` assignments
 
-3. **Created MVC Refactoring Plan** ✅
-   - **CRITICAL**: Must be executed BEFORE resuming feature work
-   - 6 tasks to clean up architecture
-   - Estimated 3-4 hours
-   - See: `docs/plans/2025-11-13-mvc-refactoring-plan.md`
+3. **Card Spacing Adjustment** ✅
+   - Adjusted card spacing to have 5px overlap
+   - Modified LayoutCalculator to use `Constants.CARD_WIDTH * card_scale - 5`
+
+4. **Testing** ✅
+   - All 68 unit tests passing (22 GameState + 23 HandValidator + 23 Player)
+   - No regressions introduced
+
+### Branch Status
+- **Current Branch**: `refactor/mvc-separation`
+- **Commits**: 7 commits (6 MVC tasks + 1 spacing adjustment + face_up fix)
+- **Tests**: 68/68 passing
+- **Ready For**: Visual testing and PR creation
 
 ---
 
 ## NEXT SESSION: Start Here! 🎯
 
-### Step 1: Execute MVC Refactoring (PRIORITY 1)
+### Step 1: Visual Testing and Card Spacing
 
-**File**: `docs/plans/2025-11-13-mvc-refactoring-plan.md`
+The MVC refactoring is complete. Before creating the PR:
 
-**Tasks**:
-1. ✅ Create LayoutCalculator utility
-2. ✅ Create CardRenderState system
-3. ✅ Eliminate View mutations
-4. ✅ Extract CARD_SCALE constant
-5. ✅ Clean up View-Controller coupling
-6. ✅ Add architecture documentation
+1. **Visual Test** the game:
+   ```bash
+   cd /home/tdo/Documents/love2d/phom
+   love .
+   ```
 
-**Time**: 3-4 hours
+2. **Verify**:
+   - ✅ Discard pile cards render face up
+   - ✅ Human player cards render face up
+   - ✅ AI player cards render face down
+   - ⏳ Card spacing is appropriate (currently 5px overlap with scale=2)
+   - ⏳ No visual glitches or regressions
 
-**Why First**: Prevents technical debt from accumulating. Clean foundation for future features.
+3. **Adjust CARD_SCALE if needed**:
+   - User identified that CARD_SCALE=2 may be causing cards to be too spread out
+   - Consider changing to CARD_SCALE=1 in `utils/constants.lua`
 
-### Step 2: Resume Feature Development (AFTER Refactoring)
+### Step 2: Finalize and Merge MVC Refactoring
+
+Once visual testing is complete:
+
+1. **Create Pull Request**:
+   ```bash
+   # Already pushed to origin/refactor/mvc-separation
+   # Create PR at: https://github.com/csessh/love2d-prototypes/pull/new/refactor/mvc-separation
+   ```
+
+2. **Merge to main**
+
+### Step 3: Resume Feature Development
 
 **File**: `docs/plans/2025-11-13-phom-card-game-implementation.md`
 
@@ -72,20 +101,24 @@
 
 ### Known Issues ⚠️
 
-1. **RNG Predictability** (Deferred)
+1. **Card Spacing with CARD_SCALE=2** (Investigating)
+   - Cards may be too spread out with current scale
+   - 5px overlap with scale=2 results in 137px spacing
+   - User debugging to determine if scale should be 1 instead of 2
+
+2. **RNG Predictability** (Deferred)
    - `math.random()` may produce same sequence
    - Needs proper entropy solution
    - Not blocking feature work
 
-2. **MVC Violations** (Addressed in refactoring plan)
-   - Card model contains rendering properties
-   - Views mutate models during draw
-   - Position logic duplicated
-
 ### Technical Debt
 
-- [ ] MVC refactoring (planned - see above)
-- [ ] Add unit tests for game logic
+- [x] MVC refactoring - **COMPLETED** ✅
+  - CardRenderState separates visual from game state
+  - LayoutCalculator centralizes position logic
+  - Views are now read-only
+  - Models contain only game data
+- [x] Unit tests for game logic - **COMPLETED** ✅ (68 tests passing)
 - [ ] Replace placeholder card sprites
 - [ ] Optimize rendering performance
 
@@ -106,15 +139,16 @@ phom/
 ### Key Components
 
 **Models**:
-- `card.lua` - Card data (CURRENTLY: has x, y - TO FIX)
+- `card.lua` - Card data (suit, rank, id only - pure data) ✅
 - `deck.lua` - Deck operations
 - `player.lua` - Player state
 - `game_state.lua` - Central game state
 - `hand_validator.lua` - Meld validation
 
 **Views**:
-- `game_view.lua` - Main rendering (CURRENTLY: mutates cards - TO FIX)
+- `game_view.lua` - Main rendering (read-only) ✅
 - `card_renderer.lua` - Card sprites
+- `card_render_state.lua` - Visual state tracking (x, y, rotation, face_up) ✅
 
 **Controllers**:
 - `game_controller.lua` - State machine
@@ -122,7 +156,8 @@ phom/
 - `ai_controller.lua` - AI logic
 
 **Utils**:
-- `constants.lua` - Game constants
+- `constants.lua` - Game constants (includes CARD_SCALE)
+- `layout_calculator.lua` - Position calculations (single source of truth) ✅
 
 ---
 
@@ -207,7 +242,8 @@ After any code changes:
 
 ## Documentation Files
 
-- `docs/plans/2025-11-13-mvc-refactoring-plan.md` - **READ THIS FIRST**
+- `docs/architecture/mvc-architecture.md` - **MVC Architecture Guide** ✅
+- `docs/plans/2025-11-13-mvc-refactoring-plan.md` - MVC Refactoring Plan (COMPLETED)
 - `docs/plans/2025-11-13-phom-card-game-implementation.md` - Feature roadmap
 - `docs/SESSION_NOTES.md` - This file
 
@@ -215,12 +251,12 @@ After any code changes:
 
 ## Questions for Next Session
 
-1. After MVC refactoring, should we proceed with Task 14 (Animated Dealing) or Task 17 (Meld Area) first?
-2. Do we want to add unit tests before or after implementing more features?
-3. Should we consider adding a simple menu screen before continuing?
+1. Should we change CARD_SCALE from 2 to 1 to reduce card spacing?
+2. After fixing spacing, should we proceed with Task 14 (Animated Dealing) or Task 17 (Meld Area) first?
+3. Should we consider adding a simple menu screen before continuing with features?
 
 ---
 
-**Last Updated**: 2025-11-13
-**Current Branch**: `feature/phom-card-game`
-**Next Action**: Execute MVC refactoring plan
+**Last Updated**: 2025-11-17
+**Current Branch**: `refactor/mvc-separation`
+**Next Action**: Visual test and adjust CARD_SCALE if needed, then merge PR
