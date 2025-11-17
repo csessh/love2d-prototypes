@@ -101,7 +101,7 @@ test("Valid set: 3 cards same rank, different suits", function()
     Card.new("diamonds", 7),
     Card.new("clubs", 7),
   }
-  assert_true(HandValidator.isValidSet(set), "Should be valid set")
+  assert_true(HandValidator.is_valid_set(set), "Should be valid set")
 end)
 
 test("Valid set: 4 cards same rank, all different suits", function()
@@ -111,7 +111,7 @@ test("Valid set: 4 cards same rank, all different suits", function()
     Card.new("clubs", 10),
     Card.new("spades", 10),
   }
-  assert_true(HandValidator.isValidSet(set), "Should be valid set")
+  assert_true(HandValidator.is_valid_set(set), "Should be valid set")
 end)
 
 -- Test invalid sets
@@ -121,7 +121,7 @@ test("Invalid set: only 2 cards", function()
     Card.new("diamonds", 5),
   }
   assert_false(
-    HandValidator.isValidSet(set),
+    HandValidator.is_valid_set(set),
     "Should not be valid set (too few cards)"
   )
 end)
@@ -133,7 +133,7 @@ test("Invalid set: different ranks", function()
     Card.new("clubs", 7),
   }
   assert_false(
-    HandValidator.isValidSet(set),
+    HandValidator.is_valid_set(set),
     "Should not be valid set (different ranks)"
   )
 end)
@@ -146,7 +146,7 @@ test("Valid sequence: A-2-3 (Ace as low)", function()
     Card.new("hearts", 3),
   }
   assert_true(
-    HandValidator.isValidSequence(seq),
+    HandValidator.is_valid_sequence(seq),
     "Should be valid sequence (A-2-3)"
   )
 end)
@@ -158,7 +158,7 @@ test("Valid sequence: 5-6-7-8", function()
     Card.new("spades", 7),
     Card.new("spades", 8),
   }
-  assert_true(HandValidator.isValidSequence(seq), "Should be valid sequence")
+  assert_true(HandValidator.is_valid_sequence(seq), "Should be valid sequence")
 end)
 
 test("Valid sequence: J-Q-K (11-12-13)", function()
@@ -168,7 +168,7 @@ test("Valid sequence: J-Q-K (11-12-13)", function()
     Card.new("diamonds", 13), -- King
   }
   assert_true(
-    HandValidator.isValidSequence(seq),
+    HandValidator.is_valid_sequence(seq),
     "Should be valid sequence (J-Q-K)"
   )
 end)
@@ -180,7 +180,7 @@ test("Valid sequence: unsorted input order", function()
     Card.new("clubs", 6),
   }
   assert_true(
-    HandValidator.isValidSequence(seq),
+    HandValidator.is_valid_sequence(seq),
     "Should be valid sequence (unsorted input)"
   )
 end)
@@ -193,7 +193,7 @@ test("Invalid sequence: K-A-2 (wrap around)", function()
     Card.new("hearts", 2),
   }
   assert_false(
-    HandValidator.isValidSequence(seq),
+    HandValidator.is_valid_sequence(seq),
     "Should not be valid (no wrap-around K-A-2)"
   )
 end)
@@ -205,7 +205,7 @@ test("Invalid sequence: Q-K-A (wrap around)", function()
     Card.new("spades", 1), -- Ace
   }
   assert_false(
-    HandValidator.isValidSequence(seq),
+    HandValidator.is_valid_sequence(seq),
     "Should not be valid (no wrap-around Q-K-A)"
   )
 end)
@@ -217,7 +217,7 @@ test("Invalid sequence: different suits", function()
     Card.new("hearts", 7),
   }
   assert_false(
-    HandValidator.isValidSequence(seq),
+    HandValidator.is_valid_sequence(seq),
     "Should not be valid (different suits)"
   )
 end)
@@ -228,7 +228,7 @@ test("Invalid sequence: only 2 cards", function()
     Card.new("clubs", 9),
   }
   assert_false(
-    HandValidator.isValidSequence(seq),
+    HandValidator.is_valid_sequence(seq),
     "Should not be valid (too few cards)"
   )
 end)
@@ -240,7 +240,7 @@ test("Invalid sequence: non-consecutive ranks", function()
     Card.new("hearts", 6),
   }
   assert_false(
-    HandValidator.isValidSequence(seq),
+    HandValidator.is_valid_sequence(seq),
     "Should not be valid (non-consecutive)"
   )
 end)
@@ -252,7 +252,7 @@ test("canFormHand: valid set with discard", function()
     Card.new("clubs", 9),
   }
   local discard = Card.new("hearts", 9)
-  assert_true(HandValidator.canFormHand(hand, discard), "Should form valid set")
+  assert_true(HandValidator.can_form_hand(hand, discard), "Should form valid set")
 end)
 
 test("canFormHand: valid sequence with discard", function()
@@ -262,7 +262,7 @@ test("canFormHand: valid sequence with discard", function()
   }
   local discard = Card.new("spades", 6)
   assert_true(
-    HandValidator.canFormHand(hand, discard),
+    HandValidator.can_form_hand(hand, discard),
     "Should form valid sequence"
   )
 end)
@@ -273,7 +273,7 @@ test("canFormHand: invalid - only 1 hand card", function()
   }
   local discard = Card.new("diamonds", 7)
   assert_false(
-    HandValidator.canFormHand(hand, discard),
+    HandValidator.can_form_hand(hand, discard),
     "Should not form meld (need 2+ hand cards)"
   )
 end)
@@ -285,7 +285,7 @@ test("canFormHand: invalid - no discard card", function()
   }
   local discard = nil
   assert_false(
-    HandValidator.canFormHand(hand, discard),
+    HandValidator.can_form_hand(hand, discard),
     "Should not form meld (no discard)"
   )
 end)
@@ -297,7 +297,7 @@ test("canFormHand: invalid - cards don't form meld", function()
   }
   local discard = Card.new("spades", 8)
   assert_false(
-    HandValidator.canFormHand(hand, discard),
+    HandValidator.can_form_hand(hand, discard),
     "Should not form meld (unrelated cards)"
   )
 end)
@@ -309,7 +309,7 @@ test("validateHandSelection: returns 'set' for valid set", function()
     Card.new("clubs", 6),
   }
   local discard = Card.new("spades", 6)
-  local result = HandValidator.validateHandSelection(hand, discard)
+  local result = HandValidator.validate_hand_selection(hand, discard)
   assert_true(
     result == "set",
     "Should return 'set' for valid set, got: " .. tostring(result)
@@ -322,7 +322,7 @@ test("validateHandSelection: returns 'sequence' for valid sequence", function()
     Card.new("diamonds", 3),
   }
   local discard = Card.new("diamonds", 4)
-  local result = HandValidator.validateHandSelection(hand, discard)
+  local result = HandValidator.validate_hand_selection(hand, discard)
   assert_true(
     result == "sequence",
     "Should return 'sequence' for valid sequence, got: " .. tostring(result)
@@ -335,7 +335,7 @@ test("validateHandSelection: returns nil for invalid meld", function()
     Card.new("clubs", 5),
   }
   local discard = Card.new("spades", 9)
-  local result = HandValidator.validateHandSelection(hand, discard)
+  local result = HandValidator.validate_hand_selection(hand, discard)
   assert_true(
     result == nil,
     "Should return nil for invalid meld, got: " .. tostring(result)
@@ -352,7 +352,7 @@ test("Edge case: Ace-low sequence A-2-3-4-5", function()
     Card.new("hearts", 5),
   }
   assert_true(
-    HandValidator.isValidSequence(seq),
+    HandValidator.is_valid_sequence(seq),
     "Should be valid (Ace-low long sequence)"
   )
 end)
@@ -363,7 +363,7 @@ test("Edge case: Cannot wrap 13-1 (K-A)", function()
     Card.new("clubs", 1),
   }
   assert_false(
-    HandValidator.isValidSequence(seq),
+    HandValidator.is_valid_sequence(seq),
     "Should not be valid (K-A wrap)"
   )
 end)

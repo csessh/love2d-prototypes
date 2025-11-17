@@ -102,7 +102,7 @@ if not Player then
   function Player:addCardToHand(card)
     table.insert(self.hand, card)
   end
-  function Player:removeCardFromHand(card)
+  function Player:remove_card_from_hand(card)
     for i, c in ipairs(self.hand) do
       if c.id == card.id then
         table.remove(self.hand, i)
@@ -129,7 +129,7 @@ if not Player then
     table.insert(self.meld_area_cards, visible_card)
     for _, card in ipairs(cards) do
       if card.id ~= visible_card.id then
-        self:removeCardFromHand(card)
+        self:remove_card_from_hand(card)
       end
     end
   end
@@ -143,10 +143,10 @@ if not Player then
     end
     return score
   end
-  function Player:getHandSize()
+  function Player:get_hand_size()
     return #self.hand
   end
-  function Player:isHandEmpty()
+  function Player:is_hand_empty()
     return #self.hand == 0
   end
 end
@@ -275,13 +275,13 @@ test("GameState deck is initialized with 52 cards", function()
   local game = GameState.new()
 
   assert_equal(game.deck:size(), 52, "Deck should have 52 cards")
-  assert_false(game.deck:isEmpty(), "Deck should not be empty")
+  assert_false(game.deck:is_empty(), "Deck should not be empty")
 end)
 
 test("getCurrentPlayer returns the current player", function()
   local game = GameState.new()
 
-  local player = game:getCurrentPlayer()
+  local player = game:get_current_player()
   assert_not_nil(player, "Should return a player")
   -- Starting player is now random, just verify it's valid
   assert_equal(player.id, game.current_player_index, "Should return the current player")
@@ -294,21 +294,21 @@ test("nextPlayer cycles through all 4 players", function()
   -- Starting player is random, but nextPlayer should cycle correctly
   local starting_index = game.current_player_index
 
-  game:nextPlayer()
+  game:next_player()
   local expected_next = (starting_index % 4) + 1
   assert_equal(game.current_player_index, expected_next, "Should move to next player")
 
   -- Cycle through all 4 players and verify we return to start
-  game:nextPlayer()
-  game:nextPlayer()
-  game:nextPlayer()
+  game:next_player()
+  game:next_player()
+  game:next_player()
   assert_equal(game.current_player_index, starting_index, "Should cycle back to starting player after 4 calls")
 end)
 
 test("getTopDiscard returns nil when discard pile is empty", function()
   local game = GameState.new()
 
-  local top = game:getTopDiscard()
+  local top = game:get_top_discard()
   assert_nil(top, "Should return nil for empty discard pile")
 end)
 
@@ -316,7 +316,7 @@ test("addToDiscard adds a card to the discard pile", function()
   local game = GameState.new()
   local card = Card.new("hearts", 7)
 
-  game:addToDiscard(card)
+  game:add_to_discard(card)
 
   assert_equal(#game.discard_pile, 1, "Discard pile should have 1 card")
   assert_equal(game.discard_pile[1].id, card.id, "Card should be in discard pile")
@@ -327,10 +327,10 @@ test("getTopDiscard returns the most recently discarded card", function()
   local card1 = Card.new("hearts", 7)
   local card2 = Card.new("spades", 10)
 
-  game:addToDiscard(card1)
-  game:addToDiscard(card2)
+  game:add_to_discard(card1)
+  game:add_to_discard(card2)
 
-  local top = game:getTopDiscard()
+  local top = game:get_top_discard()
   assert_not_nil(top, "Should return a card")
   assert_equal(top.id, card2.id, "Should return the most recent card")
 end)
@@ -339,10 +339,10 @@ test("takeFromDiscard removes and returns the top card", function()
   local game = GameState.new()
   local card = Card.new("hearts", 7)
 
-  game:addToDiscard(card)
+  game:add_to_discard(card)
   assert_equal(#game.discard_pile, 1, "Should have 1 card before taking")
 
-  local taken = game:takeFromDiscard()
+  local taken = game:take_from_discard()
   assert_not_nil(taken, "Should return a card")
   assert_equal(taken.id, card.id, "Should return the correct card")
   assert_equal(#game.discard_pile, 0, "Discard pile should be empty after taking")
@@ -351,7 +351,7 @@ end)
 test("takeFromDiscard returns nil when discard pile is empty", function()
   local game = GameState.new()
 
-  local taken = game:takeFromDiscard()
+  local taken = game:take_from_discard()
   assert_nil(taken, "Should return nil for empty discard pile")
 end)
 
@@ -359,26 +359,26 @@ test("isDeckEmpty returns true when deck is empty", function()
   local game = GameState.new()
 
   -- Draw all cards from deck
-  while not game.deck:isEmpty() do
+  while not game.deck:is_empty() do
     game.deck:draw()
   end
 
-  assert_true(game:isDeckEmpty(), "Should return true when deck is empty")
+  assert_true(game:is_deck_empty(), "Should return true when deck is empty")
 end)
 
 test("isDeckEmpty returns false when deck has cards", function()
   local game = GameState.new()
 
-  assert_false(game:isDeckEmpty(), "Should return false when deck has cards")
+  assert_false(game:is_deck_empty(), "Should return false when deck has cards")
 end)
 
 test("dealCards deals correct number of cards per player", function()
   local game = GameState.new()
 
-  game:dealCards(9)
+  game:deal_cards(9)
 
   for i, player in ipairs(game.players) do
-    assert_equal(player:getHandSize(), 9, "Player " .. i .. " should have 9 cards")
+    assert_equal(player:get_hand_size(), 9, "Player " .. i .. " should have 9 cards")
   end
 end)
 
@@ -386,7 +386,7 @@ test("dealCards reduces deck size appropriately", function()
   local game = GameState.new()
   local initial_size = game.deck:size()
 
-  game:dealCards(9)  -- 9 cards to 4 players = 36 cards
+  game:deal_cards(9)  -- 9 cards to 4 players = 36 cards
 
   assert_equal(game.deck:size(), initial_size - 36, "Deck should have 36 fewer cards")
 end)
@@ -395,8 +395,8 @@ test("dealCards shuffles the deck", function()
   local game1 = GameState.new()
   local game2 = GameState.new()
 
-  game1:dealCards(1)
-  game2:dealCards(1)
+  game1:deal_cards(1)
+  game2:deal_cards(1)
 
   -- After dealing, at least one player should have a different card
   -- This test might occasionally fail due to randomness, but probability is very low
@@ -415,32 +415,32 @@ end)
 
 test("checkWinCondition returns nil when no player has empty hand", function()
   local game = GameState.new()
-  game:dealCards(9)
+  game:deal_cards(9)
 
-  local winner = game:checkWinCondition()
+  local winner = game:check_win_condition()
   assert_nil(winner, "Should return nil when all players have cards")
 end)
 
 test("checkWinCondition returns player with empty hand", function()
   local game = GameState.new()
-  game:dealCards(9)
+  game:deal_cards(9)
 
   -- Remove all cards from player 2
-  while not game.players[2]:isHandEmpty() do
+  while not game.players[2]:is_hand_empty() do
     local card = game.players[2].hand[1]
-    game.players[2]:removeCardFromHand(card)
+    game.players[2]:remove_card_from_hand(card)
   end
 
-  local winner = game:checkWinCondition()
+  local winner = game:check_win_condition()
   assert_not_nil(winner, "Should return a winner")
   assert_equal(winner.id, 2, "Should return player 2 as winner")
 end)
 
 test("calculateAllScores stores scores for all players", function()
   local game = GameState.new()
-  game:dealCards(9)
+  game:deal_cards(9)
 
-  game:calculateAllScores()
+  game:calculate_all_scores()
 
   for i, player in ipairs(game.players) do
     assert_not_nil(game.scores[player.id], "Player " .. i .. " should have a score")
@@ -450,15 +450,15 @@ end)
 
 test("calculateAllScores gives 0 for player with empty hand", function()
   local game = GameState.new()
-  game:dealCards(9)
+  game:deal_cards(9)
 
   -- Remove all cards from player 1
-  while not game.players[1]:isHandEmpty() do
+  while not game.players[1]:is_hand_empty() do
     local card = game.players[1].hand[1]
-    game.players[1]:removeCardFromHand(card)
+    game.players[1]:remove_card_from_hand(card)
   end
 
-  game:calculateAllScores()
+  game:calculate_all_scores()
 
   assert_equal(game.scores[1], 0, "Player 1 should have score of 0")
 end)
@@ -472,28 +472,28 @@ test("Multiple discard operations maintain correct pile order", function()
   }
 
   for _, card in ipairs(cards) do
-    game:addToDiscard(card)
+    game:add_to_discard(card)
   end
 
   assert_equal(#game.discard_pile, 3, "Should have 3 cards")
 
-  local taken1 = game:takeFromDiscard()
+  local taken1 = game:take_from_discard()
   assert_equal(taken1.id, cards[3].id, "Should take card 3 first (LIFO)")
 
-  local taken2 = game:takeFromDiscard()
+  local taken2 = game:take_from_discard()
   assert_equal(taken2.id, cards[2].id, "Should take card 2 second")
 
-  local taken3 = game:takeFromDiscard()
+  local taken3 = game:take_from_discard()
   assert_equal(taken3.id, cards[1].id, "Should take card 1 last")
 end)
 
 test("GameState handles edge case of dealing 0 cards", function()
   local game = GameState.new()
 
-  game:dealCards(0)
+  game:deal_cards(0)
 
   for i, player in ipairs(game.players) do
-    assert_equal(player:getHandSize(), 0, "Player " .. i .. " should have 0 cards")
+    assert_equal(player:get_hand_size(), 0, "Player " .. i .. " should have 0 cards")
   end
 end)
 
@@ -501,16 +501,16 @@ test("GameState handles partial deal when deck runs out", function()
   local game = GameState.new()
 
   -- Try to deal 20 cards per player (80 total, but deck only has 52)
-  game:dealCards(20)
+  game:deal_cards(20)
 
   -- Calculate total cards dealt
   local total_dealt = 0
   for _, player in ipairs(game.players) do
-    total_dealt = total_dealt + player:getHandSize()
+    total_dealt = total_dealt + player:get_hand_size()
   end
 
   assert_equal(total_dealt, 52, "Should deal all 52 cards")
-  assert_true(game:isDeckEmpty(), "Deck should be empty")
+  assert_true(game:is_deck_empty(), "Deck should be empty")
 end)
 
 -- Print summary

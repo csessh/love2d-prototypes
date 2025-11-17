@@ -18,11 +18,11 @@ function GameState.new()
     turn_substep = nil,
   }
   setmetatable(instance, GameState)
-  instance:initializePlayers()
+  instance:initialize_players()
   return instance
 end
 
-function GameState:initializePlayers()
+function GameState:initialize_players()
   self.players = {
     Player.new(1, "human", Constants.POSITIONS.BOTTOM),
     Player.new(2, "ai", Constants.POSITIONS.LEFT),
@@ -31,63 +31,63 @@ function GameState:initializePlayers()
   }
 end
 
-function GameState:getCurrentPlayer()
+function GameState:get_current_player()
   return self.players[self.current_player_index]
 end
 
-function GameState:nextPlayer()
+function GameState:next_player()
   self.current_player_index = self.current_player_index
       % Constants.MAX_PLAYER_COUNT
     + 1
 end
 
-function GameState:getTopDiscard()
+function GameState:get_top_discard()
   if #self.discard_pile == 0 then
     return nil
   end
   return self.discard_pile[#self.discard_pile]
 end
 
-function GameState:addToDiscard(card)
+function GameState:add_to_discard(card)
   table.insert(self.discard_pile, card)
 end
 
-function GameState:takeFromDiscard()
+function GameState:take_from_discard()
   if #self.discard_pile == 0 then
     return nil
   end
   return table.remove(self.discard_pile)
 end
 
-function GameState:isDeckEmpty()
-  return self.deck:isEmpty()
+function GameState:is_deck_empty()
+  return self.deck:is_empty()
 end
 
-function GameState:dealCards(cards_per_player)
+function GameState:deal_cards(cards_per_player)
   self.deck:shuffle()
 
   for _ = 1, cards_per_player do
     for _, player in ipairs(self.players) do
       local card = self.deck:draw()
       if card then
-        player:addCardToHand(card)
+        player:add_card_to_hand(card)
       end
     end
   end
 end
 
-function GameState:checkWinCondition()
+function GameState:check_win_condition()
   for _, player in ipairs(self.players) do
-    if player:isHandEmpty() then
+    if player:is_hand_empty() then
       return player
     end
   end
   return nil
 end
 
-function GameState:calculateAllScores()
+function GameState:calculate_all_scores()
   for _, player in ipairs(self.players) do
-    self.scores[player.id] = player:calculateScore()
+    self.scores[player.id] = player:calculate_score()
   end
 end
 
