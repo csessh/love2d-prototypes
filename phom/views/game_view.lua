@@ -1,5 +1,6 @@
 local Constants = require("utils/constants")
 local CardRenderer = require("views/card_renderer")
+local LayoutCalculator = require("utils/layout_calculator")
 
 local GameView = {}
 GameView.__index = GameView
@@ -27,14 +28,17 @@ function GameView:draw(game_state, game_controller)
     and game_controller.animation_card
   then
     local card = game_controller.animation_card
-    local rotation = card.rotation or 0
-    self.card_renderer:draw_card(
-      card,
-      card.x,
-      card.y,
-      rotation,
-      Constants.CARD_SCALE
-    )
+    -- Only draw if card has valid position (animation may not have started yet)
+    if card.x and card.y then
+      local rotation = card.rotation or 0
+      self.card_renderer:draw_card(
+        card,
+        card.x,
+        card.y,
+        rotation,
+        Constants.CARD_SCALE
+      )
+    end
   end
 
   self:draw_ui(game_state)
@@ -42,23 +46,20 @@ end
 
 function GameView:draw_deck(game_state)
   if not game_state.deck:is_empty() then
-    -- Center both deck and discard pile horizontally, with some spacing between them
-    local spacing = 20
-    local total_width = (Constants.CARD_WIDTH * Constants.CARD_SCALE * 2)
-      + spacing
-    local deck_x = Constants.SCREEN_WIDTH / 2
-      - total_width / 2
-      + (Constants.CARD_WIDTH * Constants.CARD_SCALE / 2)
-    local deck_y = Constants.SCREEN_HEIGHT / 2
-
     local card = { face_up = false }
-    self.card_renderer:draw_card(card, deck_x, deck_y, 0, Constants.CARD_SCALE)
+    self.card_renderer:draw_card(
+      card,
+      Constants.DRAW_PILE_X,
+      Constants.DRAW_PILE_Y,
+      0,
+      Constants.CARD_SCALE
+    )
 
     love.graphics.setColor(1, 1, 1)
     love.graphics.print(
       "Deck: " .. game_state.deck:size(),
-      deck_x - 50,
-      deck_y + 110
+      Constants.DRAW_PILE_X - 50,
+      Constants.DRAW_PILE_Y + 110
     )
   end
 end
@@ -114,21 +115,22 @@ function GameView:draw_player(player)
 end
 
 function GameView:draw_bottom_player(player)
-  local center_x = Constants.SCREEN_WIDTH / 2
-  local center_y = Constants.SCREEN_HEIGHT - 70
-
-  -- Calculate horizontal positioning with no spacing
-  local card_spacing = Constants.CARD_WIDTH
-  local total_width = (#player.hand - 1) * card_spacing
-  local start_x = center_x - total_width / 2
+  local positions =
+    LayoutCalculator.calculate_hand_positions(player, Constants.CARD_SCALE)
 
   for i, card in ipairs(player.hand) do
-    local x = start_x + (i - 1) * card_spacing
-    local y = center_y + (card.hover_offset_y or 0)
-    card.x = x
-    card.y = y
-    card.face_up = player.type == "human"
-    self.card_renderer:draw_card(card, x, y, 0, Constants.CARD_SCALE)
+    local pos = positions[card.id]
+    if pos then
+      local x = pos.x
+      local y = pos.y + (card.hover_offset_y or 0)
+
+      -- Store position on card for animation system (temporary, will fix in Task 2)
+      card.x = x
+      card.y = y
+      card.face_up = player.type == "human"
+
+      self.card_renderer:draw_card(card, x, y, 0, Constants.CARD_SCALE)
+    end
   end
 
   -- Draw hand area cards
@@ -148,22 +150,29 @@ end
 function GameView:draw_left_player(player)
   local x = 150
   local center_y = Constants.SCREEN_HEIGHT / 2
-
-  -- Calculate vertical centering for hand cards (no spacing, cards touching)
-  local card_spacing = Constants.CARD_WIDTH -- When rotated, width becomes the vertical spacing
-  local total_height = (#player.hand - 1) * card_spacing
-  local start_y = center_y - total_height / 2
+  local positions =
+    LayoutCalculator.calculate_hand_positions(player, Constants.CARD_SCALE)
 
   for i, card in ipairs(player.hand) do
-    local y = start_y + (i - 1) * card_spacing
-    card.x = x
-    card.y = y
-    card.rotation = math.pi / 2
-    card.face_up = false
-    self.card_renderer:draw_card(card, x, y, math.pi / 2, Constants.CARD_SCALE)
+    local pos = positions[card.id]
+    if pos then
+      -- Store position on card for animation system (temporary, will fix in Task 2)
+      card.x = pos.x
+      card.y = pos.y
+      card.rotation = pos.rotation
+      card.face_up = false
+
+      self.card_renderer:draw_card(
+        card,
+        pos.x,
+        pos.y,
+        pos.rotation,
+        Constants.CARD_SCALE
+      )
+    end
   end
 
-  local hand_area_x = x + 180
+  local hand_area_x = 180
   local hand_area_y = center_y
   for i, card in ipairs(player.hand_area_cards) do
     self.card_renderer:draw_card(
@@ -179,19 +188,26 @@ end
 function GameView:draw_top_player(player)
   local center_x = Constants.SCREEN_WIDTH / 2
   local y = 120
-
-  -- Calculate horizontal centering (no spacing, cards touching)
-  local card_spacing = Constants.CARD_WIDTH
-  local total_width = (#player.hand - 1) * card_spacing
-  local start_x = center_x - total_width / 2
+  local positions =
+    LayoutCalculator.calculate_hand_positions(player, Constants.CARD_SCALE)
 
   for i, card in ipairs(player.hand) do
-    local x = start_x + (i - 1) * card_spacing
-    card.x = x
-    card.y = y
-    card.rotation = 0
-    card.face_up = false
-    self.card_renderer:draw_card(card, x, y, 0, Constants.CARD_SCALE)
+    local pos = positions[card.id]
+    if pos then
+      -- Store position on card for animation system (temporary, will fix in Task 2)
+      card.x = pos.x
+      card.y = pos.y
+      card.rotation = pos.rotation
+      card.face_up = false
+
+      self.card_renderer:draw_card(
+        card,
+        pos.x,
+        pos.y,
+        pos.rotation,
+        Constants.CARD_SCALE
+      )
+    end
   end
 
   local hand_area_x = center_x - 100
@@ -210,19 +226,26 @@ end
 function GameView:draw_right_player(player)
   local x = Constants.SCREEN_WIDTH - 150
   local center_y = Constants.SCREEN_HEIGHT / 2
+  local positions =
+    LayoutCalculator.calculate_hand_positions(player, Constants.CARD_SCALE)
 
-  -- Calculate vertical centering for hand cards (no spacing, cards touching)
-  local card_spacing = Constants.CARD_WIDTH -- When rotated, width becomes the vertical spacing
-  local total_height = (#player.hand - 1) * card_spacing
-  local start_y = center_y - total_height / 2
+  for _, card in ipairs(player.hand) do
+    local pos = positions[card.id]
+    if pos then
+      -- Store position on card for animation system (temporary, will fix in Task 2)
+      card.x = pos.x
+      card.y = pos.y
+      card.rotation = pos.rotation
+      card.face_up = false
 
-  for i, card in ipairs(player.hand) do
-    local y = start_y + (i - 1) * card_spacing
-    card.x = x
-    card.y = y
-    card.rotation = math.pi / 2
-    card.face_up = false
-    self.card_renderer:draw_card(card, x, y, math.pi / 2, Constants.CARD_SCALE)
+      self.card_renderer:draw_card(
+        card,
+        pos.x,
+        pos.y,
+        pos.rotation,
+        Constants.CARD_SCALE
+      )
+    end
   end
 
   local hand_area_x = x - 180

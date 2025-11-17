@@ -19,6 +19,7 @@ function love.load()
 end
 
 function love.update(dt)
+  Flux.update(dt)
   game_controller:update(dt)
   input_controller:update(dt)
 end

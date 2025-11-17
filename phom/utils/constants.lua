@@ -10,15 +10,15 @@ Constants.CARD_SCALE = 2
 local spacing = 20
 local total_width = (Constants.CARD_WIDTH * Constants.CARD_SCALE * 2) + spacing
 
-Constants.DECK_X = Constants.SCREEN_WIDTH / 2
+Constants.DRAW_PILE_X = Constants.SCREEN_WIDTH / 2
   - total_width / 2
   + (Constants.CARD_WIDTH * Constants.CARD_SCALE / 2)
-Constants.DECK_Y = Constants.SCREEN_HEIGHT / 2
+Constants.DRAW_PILE_Y = Constants.SCREEN_HEIGHT / 2
 
-Constants.DISCARD_X = Constants.SCREEN_WIDTH / 2
+Constants.DISCARD_PILE_X = Constants.SCREEN_WIDTH / 2
   + total_width / 2
   - (Constants.CARD_WIDTH * Constants.CARD_SCALE / 2)
-Constants.DISCARD_Y = Constants.SCREEN_HEIGHT / 2
+Constants.DISCARD_PILE_Y = Constants.SCREEN_HEIGHT / 2
 
 Constants.SUITS = { "hearts", "diamonds", "clubs", "spades" }
 Constants.SUIT_SYMBOLS = {
@@ -90,7 +90,7 @@ Constants.POSITIONS = {
 
 Constants.MAX_PLAYER_COUNT = 4
 Constants.ANIM_DEAL_DURATION_S = 0.3
-Constants.ANIM_DRAW_DURATION_S = 0.2
+Constants.ANIM_DRAW_DURATION_S = 0.33
 Constants.ANIM_DISCARD_DURATION_S = 0.25
 Constants.ANIM_MELD_DURATION_S = 0.3
 

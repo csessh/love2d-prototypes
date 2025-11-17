@@ -2,6 +2,7 @@ local AIController = require("controllers/ai_controller")
 local Constants = require("utils/constants")
 local Flux = require("libraries/flux")
 local GameState = require("models/game_state")
+local LayoutCalculator = require("utils/layout_calculator")
 
 local GameController = {}
 GameController.__index = GameController
@@ -139,53 +140,16 @@ function GameController:end_turn()
 end
 
 function GameController:calculate_card_target_position(player)
-  local hand_size = #player.hand
-  local card_spacing = Constants.CARD_WIDTH
-  local rotation = 0
-
-  if player.position == Constants.POSITIONS.BOTTOM then
-    local center_x = Constants.SCREEN_WIDTH / 2
-    local center_y = Constants.SCREEN_HEIGHT - 70
-    local total_width = hand_size * card_spacing
-    local start_x = center_x - total_width / 2
-    local target_x = start_x + hand_size * card_spacing
-    local target_y = center_y
-    return target_x, target_y, rotation
-  elseif player.position == Constants.POSITIONS.LEFT then
-    local x = 150
-    local center_y = Constants.SCREEN_HEIGHT / 2
-    local total_height = hand_size * card_spacing
-    local start_y = center_y - total_height / 2
-    local target_x = x
-    local target_y = start_y + hand_size * card_spacing
-    rotation = math.pi / 2
-    return target_x, target_y, rotation
-  elseif player.position == Constants.POSITIONS.TOP then
-    local center_x = Constants.SCREEN_WIDTH / 2
-    local y = 120
-    local total_width = hand_size * card_spacing
-    local start_x = center_x - total_width / 2
-    local target_x = start_x + hand_size * card_spacing
-    local target_y = y
-    return target_x, target_y, rotation
-  elseif player.position == Constants.POSITIONS.RIGHT then
-    local x = Constants.SCREEN_WIDTH - 150
-    local center_y = Constants.SCREEN_HEIGHT / 2
-    local total_height = hand_size * card_spacing
-    local start_y = center_y - total_height / 2
-    local target_x = x
-    local target_y = start_y + hand_size * card_spacing
-    rotation = math.pi / 2
-    return target_x, target_y, rotation
-  end
-
-  return 0, 0, 0
+  return LayoutCalculator.calculate_next_card_position(
+    player,
+    Constants.CARD_SCALE
+  )
 end
 
 function GameController:start_draw_animation(card, target_x, target_y, rotation)
   print("=== START DRAW ANIMATION ===")
   print("Card:", card)
-  print("From:", Constants.DECK_X, Constants.DECK_Y)
+  print("From:", Constants.DRAW_PILE_X, Constants.DRAW_PILE_Y)
   print("To:", target_x, target_y)
   print("Rotation:", rotation or 0)
 
@@ -194,18 +158,21 @@ function GameController:start_draw_animation(card, target_x, target_y, rotation)
   self.game_state.turn_substep = Constants.TURN_SUBSTEPS.ANIMATING_DRAW
 
   -- Initialize card position and rotation for animation start
-  card.x = Constants.DECK_X
-  card.y = Constants.DECK_Y
+  card.x = Constants.DRAW_PILE_X
+  card.y = Constants.DRAW_PILE_Y
   card.rotation = 0
   card.hover_offset_y = 0
 
   rotation = rotation or 0
 
-  Flux.to(card, 0.3, { x = target_x, y = target_y, rotation = rotation })
-    :oncomplete(function()
-      print("=== DRAW ANIMATION COMPLETE ===")
-      self:on_draw_animation_complete(card)
-    end)
+  Flux.to(
+    card,
+    Constants.ANIM_DRAW_DURATION_S,
+    { x = target_x, y = target_y, rotation = rotation }
+  ):oncomplete(function()
+    print("=== DRAW ANIMATION COMPLETE ===")
+    self:on_draw_animation_complete(card)
+  end)
 end
 
 function GameController:on_draw_animation_complete(card)
@@ -229,9 +196,9 @@ function GameController:start_discard_animation(card)
   -- Card position should already be set by GameView
   -- Start animation from current position to discard pile
   -- Rotation animates to 0 for AI players, stays at 0 for human players
-  Flux.to(card, 0.25, {
-    x = Constants.DISCARD_X,
-    y = Constants.DISCARD_Y,
+  Flux.to(card, Constants.ANIM_DISCARD_DURATION_S, {
+    x = Constants.DISCARD_PILE_X,
+    y = Constants.DISCARD_PILE_Y,
     rotation = 0,
   }):oncomplete(function()
     self:on_discard_animation_complete(card)
