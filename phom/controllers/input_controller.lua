@@ -102,6 +102,7 @@ function InputController:update_hover()
   -- Use LayoutCalculator for card positions
   local positions =
     LayoutCalculator.calculate_hand_positions(player, Constants.CARD_SCALE)
+  local card_render_state = self.game_controller.card_render_state
 
   -- Find which card (if any) is being hovered
   -- Check cards in REVERSE order (rightmost/topmost first)
@@ -110,7 +111,8 @@ function InputController:update_hover()
     local card = player.hand[i]
     local pos = positions[card.id]
     if pos then
-      local y = pos.y + (card.hover_offset_y or 0)
+      local render_state = card_render_state:get_state(card.id)
+      local y = pos.y + (render_state.hover_offset_y or 0)
 
       if
         LayoutCalculator.is_point_in_card(
@@ -132,9 +134,12 @@ function InputController:update_hover()
     -- Clear previous hover
     if self.hovered_card_index then
       local prev_card = player.hand[self.hovered_card_index]
-      if prev_card and prev_card.hover_offset_y then
-        -- Animate back down
-        Flux.to(prev_card, 0.1, { hover_offset_y = 0 })
+      if prev_card then
+        local prev_render_state = card_render_state:get_state(prev_card.id)
+        if prev_render_state.hover_offset_y then
+          -- Animate back down
+          Flux.to(prev_render_state, 0.1, { hover_offset_y = 0 })
+        end
       end
     end
 
@@ -142,8 +147,9 @@ function InputController:update_hover()
     self.hovered_card_index = new_hovered_index
     if new_hovered_index then
       local card = player.hand[new_hovered_index]
-      if not card.hover_offset_y then
-        card.hover_offset_y = 0
+      local render_state = card_render_state:get_state(card.id)
+      if not render_state.hover_offset_y then
+        render_state.hover_offset_y = 0
       end
 
       -- Animate up by 15% of card height
@@ -152,7 +158,7 @@ function InputController:update_hover()
         * Constants.CARD_SCALE
         * 0.15
       )
-      Flux.to(card, 0.1, { hover_offset_y = hover_offset })
+      Flux.to(render_state, 0.1, { hover_offset_y = hover_offset })
     end
   end
 end
@@ -163,8 +169,10 @@ function InputController:clear_hover()
     local player = game_state:get_current_player()
     if player and player.hand[self.hovered_card_index] then
       local card = player.hand[self.hovered_card_index]
-      if card.hover_offset_y then
-        Flux.to(card, 0.1, { hover_offset_y = 0 })
+      local card_render_state = self.game_controller.card_render_state
+      local render_state = card_render_state:get_state(card.id)
+      if render_state.hover_offset_y then
+        Flux.to(render_state, 0.1, { hover_offset_y = 0 })
       end
     end
     self.hovered_card_index = nil

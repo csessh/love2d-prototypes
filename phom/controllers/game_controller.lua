@@ -3,6 +3,7 @@ local Constants = require("utils/constants")
 local Flux = require("libraries/flux")
 local GameState = require("models/game_state")
 local LayoutCalculator = require("utils/layout_calculator")
+local CardRenderState = require("views/card_render_state")
 
 local GameController = {}
 GameController.__index = GameController
@@ -14,6 +15,7 @@ function GameController.new()
     ai_controller = nil,
     animating = false,
     animation_card = nil,
+    card_render_state = CardRenderState.new(),
   }
   setmetatable(instance, GameController)
   instance.ai_controller = AIController.new(instance)
@@ -157,16 +159,19 @@ function GameController:start_draw_animation(card, target_x, target_y, rotation)
   self.animation_card = card
   self.game_state.turn_substep = Constants.TURN_SUBSTEPS.ANIMATING_DRAW
 
-  -- Initialize card position and rotation for animation start
-  card.x = Constants.DRAW_PILE_X
-  card.y = Constants.DRAW_PILE_Y
-  card.rotation = 0
-  card.hover_offset_y = 0
+  -- Use CardRenderState instead of card properties
+  local render_state = self.card_render_state:get_state(card.id)
+  render_state.x = Constants.DRAW_PILE_X
+  render_state.y = Constants.DRAW_PILE_Y
+  render_state.rotation = 0
+  render_state.hover_offset_y = 0
+  render_state.face_up = (self.game_state:get_current_player().type == "human")
 
   rotation = rotation or 0
 
+  -- Animate the render state, not the card
   Flux.to(
-    card,
+    render_state,
     Constants.ANIM_DRAW_DURATION_S,
     { x = target_x, y = target_y, rotation = rotation }
   ):oncomplete(function()
@@ -191,12 +196,14 @@ function GameController:start_discard_animation(card)
 
   local player = self.game_state:get_current_player()
   player:remove_card_from_hand(card)
-  card.face_up = true
 
-  -- Card position should already be set by GameView
-  -- Start animation from current position to discard pile
+  -- Use CardRenderState
+  local render_state = self.card_render_state:get_state(card.id)
+  render_state.face_up = true
+  -- render_state.x and render_state.y already set by GameView
+
   -- Rotation animates to 0 for AI players, stays at 0 for human players
-  Flux.to(card, Constants.ANIM_DISCARD_DURATION_S, {
+  Flux.to(render_state, Constants.ANIM_DISCARD_DURATION_S, {
     x = Constants.DISCARD_PILE_X,
     y = Constants.DISCARD_PILE_Y,
     rotation = 0,
