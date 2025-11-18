@@ -329,16 +329,17 @@ function GameView:draw_turn_indicator(game_state)
 end
 
 function GameView:get_discard_pile_anchor(position)
-  if position == Constants.POSITIONS.BOTTOM then
-    return Constants.SCREEN_WIDTH / 2, Constants.SCREEN_HEIGHT - 300, 0
-  elseif position == Constants.POSITIONS.TOP then
-    return Constants.SCREEN_WIDTH / 2, 300, 0
-  elseif position == Constants.POSITIONS.LEFT then
-    return 400, Constants.SCREEN_HEIGHT / 2, math.pi / 2
-  elseif position == Constants.POSITIONS.RIGHT then
-    return Constants.SCREEN_WIDTH - 400, Constants.SCREEN_HEIGHT / 2, math.pi / 2
+  local pos = Constants.DISCARD_PILE_POSITIONS[position]
+  if not pos then
+    return 0, 0, 0
   end
-  return 0, 0, 0
+
+  local rotation = 0
+  if position == Constants.POSITIONS.LEFT or position == Constants.POSITIONS.RIGHT then
+    rotation = math.pi / 2
+  end
+
+  return pos.x, pos.y, rotation
 end
 
 function GameView:draw_player_discard_pile(game_state, player, card_render_state)
@@ -358,9 +359,11 @@ function GameView:draw_player_discard_pile(game_state, player, card_render_state
   -- Render cards in z-index order (bottom to top)
   for i, card in ipairs(cards) do
     local pos = positions[card.id]
+    -- Cards in discard piles are always face up
+    card.face_up = true
     self.card_renderer:draw_card(
       card, pos.x, pos.y, pos.rotation,
-      Constants.CARD_SCALE, true  -- Always face up
+      Constants.CARD_SCALE
     )
   end
 end

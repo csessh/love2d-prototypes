@@ -384,20 +384,23 @@ end
 ## Edge Cases and Testing
 
 ### Empty Discard Piles
-- Game starts with all piles empty (after future refactor)
+- Game starts with all piles empty
 - No placeholder rendering for empty piles
 - Cannot click empty previous player's pile (returns false)
 
-### Initial Discard (Temporary)
-**Current implementation:** One shared initial card from dealing phase
+### Initial Discard - REMOVED (Game Rule Change)
+**Previous behavior:** Game started with one card dealt to a shared discard pile
 
-**Temporary solution:**
-- Keep `game_state.discard_pile` for initial card
-- Render in center (existing behavior)
-- First player can pick from it OR draw from deck
-- After first turn, all discards go to per-player piles
+**Current implementation (as of 2025-11-18):**
+- ✅ **REMOVED** - No initial discard card
+- All players start with empty discard piles
+- First player must draw from deck (cannot pick from discard on turn 1)
+- This is an intentional game rule simplification
 
-**Future refactor:** Remove initial discard, all piles start empty
+**Rationale:**
+- Eliminates complexity of shared initial discard
+- Cleaner separation: all discards are per-player
+- First turn always draws from deck, gameplay consistent from start
 
 ### Pile Growth
 - Cards spread horizontally with 30px offset

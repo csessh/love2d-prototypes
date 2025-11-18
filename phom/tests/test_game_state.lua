@@ -240,7 +240,7 @@ test("GameState creation initializes with default values", function()
   local game = GameState.new()
 
   assert_not_nil(game.deck, "Deck should be initialized")
-  assert_equal(#game.discard_pile, 0, "Discard pile should be empty")
+  assert_not_nil(game.discard_piles, "Discard piles should be initialized")
   assert_equal(#game.players, 4, "Should have 4 players")
   -- Current player index is now randomized (1-4), so just check it's valid
   assert_true(game.current_player_index >= 1 and game.current_player_index <= 4,
@@ -305,55 +305,8 @@ test("nextPlayer cycles through all 4 players", function()
   assert_equal(game.current_player_index, starting_index, "Should cycle back to starting player after 4 calls")
 end)
 
-test("getTopDiscard returns nil when discard pile is empty", function()
-  local game = GameState.new()
-
-  local top = game:get_top_discard()
-  assert_nil(top, "Should return nil for empty discard pile")
-end)
-
-test("addToDiscard adds a card to the discard pile", function()
-  local game = GameState.new()
-  local card = Card.new("hearts", 7)
-
-  game:add_to_discard(card)
-
-  assert_equal(#game.discard_pile, 1, "Discard pile should have 1 card")
-  assert_equal(game.discard_pile[1].id, card.id, "Card should be in discard pile")
-end)
-
-test("getTopDiscard returns the most recently discarded card", function()
-  local game = GameState.new()
-  local card1 = Card.new("hearts", 7)
-  local card2 = Card.new("spades", 10)
-
-  game:add_to_discard(card1)
-  game:add_to_discard(card2)
-
-  local top = game:get_top_discard()
-  assert_not_nil(top, "Should return a card")
-  assert_equal(top.id, card2.id, "Should return the most recent card")
-end)
-
-test("takeFromDiscard removes and returns the top card", function()
-  local game = GameState.new()
-  local card = Card.new("hearts", 7)
-
-  game:add_to_discard(card)
-  assert_equal(#game.discard_pile, 1, "Should have 1 card before taking")
-
-  local taken = game:take_from_discard()
-  assert_not_nil(taken, "Should return a card")
-  assert_equal(taken.id, card.id, "Should return the correct card")
-  assert_equal(#game.discard_pile, 0, "Discard pile should be empty after taking")
-end)
-
-test("takeFromDiscard returns nil when discard pile is empty", function()
-  local game = GameState.new()
-
-  local taken = game:take_from_discard()
-  assert_nil(taken, "Should return nil for empty discard pile")
-end)
+-- Note: Discard pile tests moved to test_game_state_discard_piles.lua
+-- Old single discard_pile replaced with per-player discard_piles
 
 test("isDeckEmpty returns true when deck is empty", function()
   local game = GameState.new()
@@ -463,29 +416,7 @@ test("calculateAllScores gives 0 for player with empty hand", function()
   assert_equal(game.scores[1], 0, "Player 1 should have score of 0")
 end)
 
-test("Multiple discard operations maintain correct pile order", function()
-  local game = GameState.new()
-  local cards = {
-    Card.new("hearts", 1),
-    Card.new("diamonds", 2),
-    Card.new("clubs", 3)
-  }
-
-  for _, card in ipairs(cards) do
-    game:add_to_discard(card)
-  end
-
-  assert_equal(#game.discard_pile, 3, "Should have 3 cards")
-
-  local taken1 = game:take_from_discard()
-  assert_equal(taken1.id, cards[3].id, "Should take card 3 first (LIFO)")
-
-  local taken2 = game:take_from_discard()
-  assert_equal(taken2.id, cards[2].id, "Should take card 2 second")
-
-  local taken3 = game:take_from_discard()
-  assert_equal(taken3.id, cards[1].id, "Should take card 1 last")
-end)
+-- Note: Discard pile order tests moved to test_game_state_discard_piles.lua
 
 test("GameState handles edge case of dealing 0 cards", function()
   local game = GameState.new()

@@ -39,7 +39,7 @@ Each turn consists of:
 **Valid Meld Types:**
 - **Sets**: 3+ cards of same rank, any suits (e.g., 7♥ 7♦ 7♣)
 - **Sequences**: 3+ consecutive ranks, same suit (e.g., 6♥ 7♥ 8♥)
-  - Ace is HIGH only (Q-K-A valid, A-2-3 invalid)
+  - Ace is LOW only (A-2-3 valid, Q-K-A invalid)
   - No wrap-around sequences
 
 **Meld Formation:**
