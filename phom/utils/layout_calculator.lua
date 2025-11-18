@@ -178,4 +178,27 @@ function LayoutCalculator.is_point_in_card(
     and py <= card_y + half_h
 end
 
+-- Calculate positions for cards in a discard pile with horizontal spreading
+-- Returns: table mapping card.id -> {x, y, rotation, z_index}
+function LayoutCalculator.calculate_discard_pile_positions(cards, base_x, base_y, rotation, card_scale)
+  card_scale = card_scale or 1
+  rotation = rotation or 0
+
+  local positions = {}
+  local overlap_offset = Constants.DISCARD_OVERLAP_OFFSET
+
+  for i, card in ipairs(cards) do
+    local is_top_card = (i == #cards)
+    positions[card.id] = {
+      x = base_x + (i - 1) * overlap_offset,
+      y = base_y,
+      rotation = rotation,
+      z_index = i,  -- Higher index = rendered on top
+      fully_visible = is_top_card
+    }
+  end
+
+  return positions
+end
+
 return LayoutCalculator
