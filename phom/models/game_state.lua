@@ -10,7 +10,7 @@ function GameState.new()
     current_player_index = math.random(1, Constants.MAX_PLAYER_COUNT),
     current_state = Constants.STATES.MENU,
     deck = Deck.new(),
-    discard_pile = {},
+    discard_piles = {},  -- Per-player discard piles
     players = {},
     round_number = 1,
     scores = {},
@@ -41,23 +41,6 @@ function GameState:next_player()
     + 1
 end
 
-function GameState:get_top_discard()
-  if #self.discard_pile == 0 then
-    return nil
-  end
-  return self.discard_pile[#self.discard_pile]
-end
-
-function GameState:add_to_discard(card)
-  table.insert(self.discard_pile, card)
-end
-
-function GameState:take_from_discard()
-  if #self.discard_pile == 0 then
-    return nil
-  end
-  return table.remove(self.discard_pile)
-end
 
 function GameState:is_deck_empty()
   return self.deck:is_empty()
@@ -73,6 +56,11 @@ function GameState:deal_cards(cards_per_player)
         player:add_card_to_hand(card)
       end
     end
+  end
+
+  -- Initialize empty discard pile for each player
+  for _, player in ipairs(self.players) do
+    self.discard_piles[player.id] = {}
   end
 end
 
