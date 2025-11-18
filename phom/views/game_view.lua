@@ -25,7 +25,6 @@ end
 function GameView:draw(game_state, animation_state)
   love.graphics.clear(0.1, 0.4, 0.2)
   self:draw_deck(game_state)
-  self:draw_discard_pile(game_state)
 
   local card_render_state = animation_state.card_render_state
 
@@ -76,43 +75,6 @@ function GameView:draw_deck(game_state)
   end
 end
 
-function GameView:draw_discard_pile(game_state)
-  -- Center both deck and discard pile horizontally, with some spacing between them
-  local spacing = 20
-  local total_width = (Constants.CARD_WIDTH * Constants.CARD_SCALE * 2)
-    + spacing
-  local discard_x = Constants.SCREEN_WIDTH / 2
-    + total_width / 2
-    - (Constants.CARD_WIDTH * Constants.CARD_SCALE / 2)
-  local discard_y = Constants.SCREEN_HEIGHT / 2
-
-  local top_card = game_state:get_top_discard()
-  if top_card then
-    self.card_renderer:draw_card(
-      top_card,
-      discard_x,
-      discard_y,
-      0,
-      Constants.CARD_SCALE
-    )
-  else
-    -- Draw placeholder with size * 1.2
-    local placeholder_scale = 1.2
-    love.graphics.setColor(0.3, 0.3, 0.3)
-    love.graphics.rectangle(
-      "line",
-      discard_x - Constants.CARD_WIDTH * placeholder_scale / 2,
-      discard_y - Constants.CARD_HEIGHT * placeholder_scale / 2,
-      Constants.CARD_WIDTH * placeholder_scale,
-      Constants.CARD_HEIGHT * placeholder_scale,
-      5,
-      5
-    )
-    love.graphics.setColor(1, 1, 1)
-  end
-
-  love.graphics.print("Discard", discard_x - 30, discard_y + 110)
-end
 
 function GameView:draw_player(player, card_render_state)
   if player.position == Constants.POSITIONS.BOTTOM then

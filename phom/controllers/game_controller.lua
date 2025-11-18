@@ -53,12 +53,6 @@ function GameController:handle_dealing()
   -- TODO: Add drawing animations
   self.game_state:deal_cards(9)
 
-  -- TODO: This might not be correct. Review later.
-  local first_discard = self.game_state.deck:draw()
-  if first_discard then
-    self.game_state:add_to_discard(first_discard)
-  end
-
   -- Set initial state based on who starts (current_player_index was randomized)
   local starting_player = self.game_state:get_current_player()
   if starting_player.type == "human" then
@@ -109,7 +103,7 @@ function GameController:discard_card(card)
   if current_player.type == "human" then
     -- Human player already uses animation via InputController
     if current_player:remove_card_from_hand(card) then
-      self.game_state:add_to_discard(card)
+      self.game_state:add_to_discard(current_player.id, card)
       self:end_turn()
     end
   else
@@ -213,7 +207,8 @@ function GameController:start_discard_animation(card)
 end
 
 function GameController:on_discard_animation_complete(card)
-  self.game_state:add_to_discard(card)
+  local current_player = self.game_state:get_current_player()
+  self.game_state:add_to_discard(current_player.id, card)
   self:end_turn()
   self.animating = false
   self.animation_card = nil
