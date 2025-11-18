@@ -28,6 +28,11 @@ function GameView:draw(game_state, animation_state)
 
   local card_render_state = animation_state.card_render_state
 
+  -- Draw each player's discard pile
+  for _, player in ipairs(game_state.players) do
+    self:draw_player_discard_pile(game_state, player, card_render_state)
+  end
+
   for _, player in ipairs(game_state.players) do
     self:draw_player(player, card_render_state)
   end
@@ -321,6 +326,43 @@ function GameView:draw_turn_indicator(game_state)
   end
 
   love.graphics.setColor(1, 1, 1) -- Reset to white
+end
+
+function GameView:get_discard_pile_anchor(position)
+  if position == Constants.POSITIONS.BOTTOM then
+    return Constants.SCREEN_WIDTH / 2, Constants.SCREEN_HEIGHT - 300, 0
+  elseif position == Constants.POSITIONS.TOP then
+    return Constants.SCREEN_WIDTH / 2, 300, 0
+  elseif position == Constants.POSITIONS.LEFT then
+    return 400, Constants.SCREEN_HEIGHT / 2, math.pi / 2
+  elseif position == Constants.POSITIONS.RIGHT then
+    return Constants.SCREEN_WIDTH - 400, Constants.SCREEN_HEIGHT / 2, math.pi / 2
+  end
+  return 0, 0, 0
+end
+
+function GameView:draw_player_discard_pile(game_state, player, card_render_state)
+  local cards = game_state:get_cards_from_discard_pile(player.id)
+  if #cards == 0 then
+    return  -- No rendering for empty piles
+  end
+
+  -- Get anchor position based on player position
+  local base_x, base_y, rotation = self:get_discard_pile_anchor(player.position)
+
+  -- Calculate spread positions for all cards
+  local positions = LayoutCalculator.calculate_discard_pile_positions(
+    cards, base_x, base_y, rotation, Constants.CARD_SCALE
+  )
+
+  -- Render cards in z-index order (bottom to top)
+  for i, card in ipairs(cards) do
+    local pos = positions[card.id]
+    self.card_renderer:draw_card(
+      card, pos.x, pos.y, pos.rotation,
+      Constants.CARD_SCALE, true  -- Always face up
+    )
+  end
 end
 
 return GameView
