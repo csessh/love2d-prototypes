@@ -31,6 +31,33 @@ assert_equal(pile_exists, true, "Player discard pile initialized")
 local pile_empty = #game.discard_piles[bottom_player.id] == 0
 assert_equal(pile_empty, true, "Player discard pile starts empty")
 
+local Card = require("models/card")
+
+-- Test 3: add_to_discard adds card to specific player's pile
+local test_card = Card.new("hearts", 5)
+game:add_to_discard(bottom_player.id, test_card)
+local pile_size = #game.discard_piles[bottom_player.id]
+assert_equal(pile_size, 1, "add_to_discard increases pile size")
+
+local added_card = game.discard_piles[bottom_player.id][1]
+assert_equal(added_card.id, test_card.id, "add_to_discard adds correct card")
+
+-- Test 4: get_cards_from_discard_pile returns pile array
+local cards = game:get_cards_from_discard_pile(bottom_player.id)
+assert_equal(#cards, 1, "get_cards_from_discard_pile returns correct count")
+assert_equal(cards[1].id, test_card.id, "get_cards_from_discard_pile returns correct card")
+
+-- Test 5: take_top_card_from_discard_pile removes and returns card
+local taken_card = game:take_top_card_from_discard_pile(bottom_player.id)
+assert_equal(taken_card.id, test_card.id, "take_top_card returns correct card")
+
+local pile_after_take = game:get_cards_from_discard_pile(bottom_player.id)
+assert_equal(#pile_after_take, 0, "take_top_card removes card from pile")
+
+-- Test 6: take from empty pile returns nil
+local from_empty = game:take_top_card_from_discard_pile(bottom_player.id)
+assert_equal(from_empty, nil, "take from empty pile returns nil")
+
 print("\n=== Test Summary ===")
 print("Tests run: " .. (tests_passed + tests_failed))
 print("Tests passed: " .. tests_passed)

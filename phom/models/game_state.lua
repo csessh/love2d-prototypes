@@ -79,4 +79,23 @@ function GameState:calculate_all_scores()
   end
 end
 
+function GameState:add_to_discard(player_id, card)
+  if not self.discard_piles[player_id] then
+    self.discard_piles[player_id] = {}
+  end
+  table.insert(self.discard_piles[player_id], card)
+end
+
+function GameState:get_cards_from_discard_pile(player_id)
+  return self.discard_piles[player_id] or {}
+end
+
+function GameState:take_top_card_from_discard_pile(player_id)
+  local pile = self.discard_piles[player_id]
+  if not pile or #pile == 0 then
+    return nil
+  end
+  return table.remove(pile)  -- Removes last element and returns it
+end
+
 return GameState
