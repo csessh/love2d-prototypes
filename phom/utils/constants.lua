@@ -92,6 +92,17 @@ Constants.MAX_PLAYER_COUNT = 4
 Constants.ANIM_DEAL_DURATION_S = 0.3
 Constants.ANIM_DRAW_DURATION_S = 0.33
 Constants.ANIM_DISCARD_DURATION_S = 0.25
+
+-- Discard pile configuration
+Constants.DISCARD_OVERLAP_OFFSET = 30  -- Horizontal spacing between cards in pile
+
+-- Discard pile anchor positions (base position for each player's pile)
+Constants.DISCARD_PILE_POSITIONS = {
+  BOTTOM = { x = 640, y = 420 },  -- Above player hand
+  TOP = { x = 640, y = 300 },     -- Below player cards
+  LEFT = { x = 400, y = 360 },    -- Right of player hand
+  RIGHT = { x = 880, y = 360 }    -- Left of player hand
+}
 Constants.ANIM_MELD_DURATION_S = 0.3
 
 return Constants
