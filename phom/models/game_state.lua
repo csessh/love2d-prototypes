@@ -41,6 +41,14 @@ function GameState:next_player()
     + 1
 end
 
+function GameState:get_previous_player()
+  local prev_index = self.current_player_index - 1
+  if prev_index < 1 then
+    prev_index = #self.players  -- Wrap to last player
+  end
+  return self.players[prev_index]
+end
+
 
 function GameState:is_deck_empty()
   return self.deck:is_empty()
@@ -96,6 +104,11 @@ function GameState:take_top_card_from_discard_pile(player_id)
     return nil
   end
   return table.remove(pile)  -- Removes last element and returns it
+end
+
+function GameState:get_previous_player_discard_pile()
+  local prev_player = self:get_previous_player()
+  return self:get_cards_from_discard_pile(prev_player.id)
 end
 
 return GameState

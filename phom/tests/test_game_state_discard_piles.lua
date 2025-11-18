@@ -58,6 +58,26 @@ assert_equal(#pile_after_take, 0, "take_top_card removes card from pile")
 local from_empty = game:take_top_card_from_discard_pile(bottom_player.id)
 assert_equal(from_empty, nil, "take from empty pile returns nil")
 
+-- Test 7: get_previous_player returns correct player in sequence
+game.current_player_index = 2  -- Second player
+local prev_player = game:get_previous_player()
+assert_equal(prev_player.id, game.players[1].id, "get_previous_player returns player 1 when current is 2")
+
+-- Test 8: get_previous_player wraps around
+game.current_player_index = 1  -- First player
+prev_player = game:get_previous_player()
+assert_equal(prev_player.id, game.players[4].id, "get_previous_player wraps to player 4 when current is 1")
+
+-- Test 9: get_previous_player_discard_pile returns previous player's pile
+local card_for_prev = Card.new("diamonds", 10)
+game.current_player_index = 2
+local prev = game:get_previous_player()
+game:add_to_discard(prev.id, card_for_prev)
+
+local prev_pile = game:get_previous_player_discard_pile()
+assert_equal(#prev_pile, 1, "get_previous_player_discard_pile returns correct pile")
+assert_equal(prev_pile[1].id, card_for_prev.id, "get_previous_player_discard_pile has correct card")
+
 print("\n=== Test Summary ===")
 print("Tests run: " .. (tests_passed + tests_failed))
 print("Tests passed: " .. tests_passed)
